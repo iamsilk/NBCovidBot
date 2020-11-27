@@ -47,7 +47,7 @@ namespace StebumBot
 
             Host = hostBuilder.Build();
 
-            await Host.StartAsync();
+            await Host.RunAsync();
         }
 
         private void ExportResource(string resource)
