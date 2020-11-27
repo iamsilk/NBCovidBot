@@ -1,0 +1,15 @@
+[Unit]
+Description=A discord bot named Stebum.
+
+[Service]
+WorkingDirectory=/var/local/stebum-bot
+ExecStart=/usr/bin/dotnet /usr/local/bin/stebum-bot/StebumBot.dll
+Restart=always
+# Restart service after 10 seconds if the dotnet service crashes:
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=dotnet-example
+User=stebum
+
+[Install]
+WantedBy=multi-user.target
