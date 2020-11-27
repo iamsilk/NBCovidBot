@@ -1,10 +1,11 @@
 ﻿using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace StebumBot.Commands
 {
@@ -61,7 +62,15 @@ namespace StebumBot.Commands
             
             var context = new SocketCommandContext(_client, userMessage);
 
+            _logger.LogInformation($"Executing command '{userMessage.Content}' from user {userMessage.Author}.");
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             await Commands.ExecuteAsync(context, argPos, _services);
+
+            _logger.LogDebug($"Executed command '{userMessage.Content}' in {stopwatch.ElapsedMilliseconds}");
+
         }
     }
 }
