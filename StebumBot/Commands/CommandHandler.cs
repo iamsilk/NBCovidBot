@@ -67,10 +67,18 @@ namespace StebumBot.Commands
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            await Commands.ExecuteAsync(context, argPos, _services);
+            var result = await Commands.ExecuteAsync(context, argPos, _services);
 
-            _logger.LogDebug($"Executed command '{userMessage.Content}' in {stopwatch.ElapsedMilliseconds}");
+            stopwatch.Stop();
 
+            if (result.IsSuccess)
+            {
+                _logger.LogDebug($"Successfully executed command {message.Content} in {stopwatch.ElapsedMilliseconds}");
+            }
+            else
+            {
+                _logger.LogWarning($"Error ({result.Error}) occurred while executing command {message.Content} - {result.ErrorReason}");
+            }
         }
     }
 }
