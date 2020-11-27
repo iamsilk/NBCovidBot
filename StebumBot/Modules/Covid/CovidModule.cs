@@ -61,19 +61,9 @@ namespace StebumBot.Modules.Covid
                 return null;
             }
 
-            Root<T> root;
+            await using var stream = await response.Content.ReadAsStreamAsync();
 
-            try
-            {
-                await using var stream = await response.Content.ReadAsStreamAsync();
-
-                root = await JsonSerializer.DeserializeAsync<Root<T>>(stream);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+            var root = await JsonSerializer.DeserializeAsync<Root<T>>(stream);
 
             if (root?.Features == null || root.Features.Count(x => x != null) == 0)
             {
