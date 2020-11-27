@@ -1,5 +1,6 @@
 ﻿using Discord.Commands;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Configuration;
 using StebumBot.Modules.Covid.Models;
 using System;
 using System.Collections.Generic;
@@ -10,12 +11,20 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Web;
+using TimeZoneConverter;
 
 namespace StebumBot.Modules.Covid
 {
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public class CovidModule : ModuleBase<SocketCommandContext>
     {
+        private readonly IConfiguration _configuration;
+
+        public CovidModule(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         private async Task<List<T>> QueryData<T>(string service, string query, string orderBy = null)
         {
             var fields = new List<string>();
@@ -77,7 +86,7 @@ namespace StebumBot.Modules.Covid
 
         private DateTimeOffset GetDate(long timestamp)
         {
-            var timeZone = TimeZoneInfo.FindSystemTimeZoneById("Atlantic Standard Time");
+            var timeZone = TZConvert.GetTimeZoneInfo(_configuration["timezone"]);
             var date = DateTimeOffset.FromUnixTimeMilliseconds(timestamp);
             return TimeZoneInfo.ConvertTime(date, timeZone);
         }
