@@ -98,7 +98,7 @@ namespace StebumBot.Modules.Covid
             var province = (await QueryData<DailyProvinceCovidInfo>("HealthZones", "HealthZone='Province'"))?.First();
             if (province == null) return;
 
-            var city = (await QueryData<DailyCityCovidInfo>("HealthZones", "HealthZone='2'"))?.First();
+            var city = (await QueryData<DailyCityCovidInfo>("HealthZones", "HealthZone='3'"))?.First();
             if (city == null) return;
 
             var pastWeek = await QueryData<PastCovidInfo>("Covid19DailyCaseStats", "Total>0", "DATE desc");
@@ -126,7 +126,7 @@ namespace StebumBot.Modules.Covid
 
             var nl = Environment.NewLine;
 
-            var response = $"__**{latestDate:MMMM dd, yyyy} (Provincial / Saint John):**__" + nl +
+            var response = $"__**{latestDate:MMMM dd, yyyy} (Provincial / Fredericton):**__" + nl +
                            $"Active Cases: *{province.ActiveCases} ({(changes[0] >= 0 ? "+" : "")}{changes[0]})  /  {city.ActiveCases}*" + nl +
                            $"New: *{province.NewToday}  /  {city.NewToday}*   Recovered: *{pastWeek[0].NewRecoveredToday}*" + nl +
                            $"Recovery Phase: *{province.RecoveryPhase}  /  {city.RecoveryPhase}*" + nl +
