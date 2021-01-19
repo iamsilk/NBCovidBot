@@ -1,5 +1,4 @@
-﻿using Discord;
-using Discord.Commands;
+﻿using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using StebumBot.Modules.Covid.Models;
@@ -127,17 +126,7 @@ namespace StebumBot.Modules.Covid
 
             var nl = Environment.NewLine;
 
-            var embedBuilder = new EmbedBuilder();
-
-            embedBuilder.AddField("Test Name", "Test Value")
-                .WithAuthor(Context.Client.CurrentUser)
-                .WithDescription("Test Description")
-                .WithFooter("Test footer")
-                .WithCurrentTimestamp()
-                .WithTitle("Test Title")
-                .WithUrl("https://experience.arcgis.com/experience/8eeb9a2052d641c996dba5de8f25a8aa");
-
-            /*var response = $"__**{latestDate:MMMM dd, yyyy} (Provincial / Fredericton):**__" + nl +
+            var response = $"__**{latestDate:MMMM dd, yyyy} (Provincial / Fredericton):**__" + nl +
                            $"Active Cases: *{province.ActiveCases} ({(changes[0] >= 0 ? "+" : "")}{changes[0]})  /  {city.ActiveCases}*" + nl +
                            $"New: *{province.NewToday}  /  {city.NewToday}*   Recovered: *{pastWeek[0].NewRecoveredToday}*" + nl +
                            $"Recovery Phase: *{province.RecoveryPhase}  /  {city.RecoveryPhase}*" + nl +
@@ -149,9 +138,9 @@ namespace StebumBot.Modules.Covid
                            $"Under Investigation: *{province.UnderInvestigation}*" + nl +
                            nl +
                            "__**Past Week:**__" + nl +
-                           string.Join(nl, history);*/
+                           string.Join(nl, history);
 
-            await ReplyAsync(embed: embedBuilder.Build());
+            await ReplyAsync(response);
         }
     }
 }
