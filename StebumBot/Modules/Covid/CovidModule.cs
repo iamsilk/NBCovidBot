@@ -11,6 +11,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Web;
+using Discord;
 using TimeZoneConverter;
 
 namespace StebumBot.Modules.Covid
@@ -98,8 +99,11 @@ namespace StebumBot.Modules.Covid
             var province = (await QueryData<DailyProvinceCovidInfo>("HealthZones", "HealthZone='Province'"))?.First();
             if (province == null) return;
 
-            var city = (await QueryData<DailyCityCovidInfo>("HealthZones", "HealthZone='3'"))?.First();
-            if (city == null) return;
+            var moncton = (await QueryData<DailyCityCovidInfo>("HealthZones", "HealthZone='1'"))?.First();
+            if (moncton == null) return;
+
+            var fredericton = (await QueryData<DailyCityCovidInfo>("HealthZones", "HealthZone='3'"))?.First();
+            if (fredericton == null) return;
 
             var pastWeek = await QueryData<PastCovidInfo>("Covid19DailyCaseStats", "Total>0", "DATE desc");
             if (pastWeek == null) return;
@@ -113,7 +117,7 @@ namespace StebumBot.Modules.Covid
             var changes = new int[7];
             var history = new string[7];
 
-            for (int i = 0; i < 7; i++)
+            for (var i = 0; i < 7; i++)
             {
                 changes[i] = pastWeek[i].Active - pastWeek[i + 1].Active;
 
@@ -121,11 +125,40 @@ namespace StebumBot.Modules.Covid
 
                 history[i] = $"{date:MMM dd} - *{pastWeek[i].Active} ({(changes[0] >= 0 ? "+" : "")}{changes[i]})*";
             }
+            
+            var embedBuilder = new EmbedBuilder();
 
+            var totalFieldText =
+                $"Active Cases: *{province.ActiveCases}*\n" +
+                $"New: *{province.NewToday}*\n" +
+                $"Phase: *{province.RecoveryPhase}*\n" +
+                $"Recovered: *{pastWeek[0].NewRecoveredToday}*";
+            
+            var fredFieldText =
+                $"*{fredericton.ActiveCases}*\n" +
+                $"*{fredericton.NewToday}*\n" +
+                $"*{fredericton.RecoveryPhase}*\n";
+
+            var moncFieldText =
+                $"*{moncton.ActiveCases}*\n" +
+                $"*{moncton.NewToday}*\n" +
+                $"*{moncton.RecoveryPhase}*\n";
+
+            embedBuilder
+                .WithTitle("New Brunswick COVID-19 Statistics")
+                .WithUrl("https://experience.arcgis.com/experience/8eeb9a2052d641c996dba5de8f25a8aa")
+                .AddField("Total", totalFieldText, true)
+                .AddField("Fredericton", fredFieldText, true)
+                .AddField("Moncton", moncFieldText, true)
+                .WithCurrentTimestamp();
+
+            await ReplyAsync(embed: embedBuilder.Build());
+
+            /*
             var latestDate = GetDate(province.LastUpdate);
 
             var nl = Environment.NewLine;
-
+            
             var response = $"__**{latestDate:MMMM dd, yyyy} (Provincial / Fredericton):**__" + nl +
                            $"Active Cases: *{province.ActiveCases} ({(changes[0] >= 0 ? "+" : "")}{changes[0]})  /  {city.ActiveCases}*" + nl +
                            $"New: *{province.NewToday}  /  {city.NewToday}*   Recovered: *{pastWeek[0].NewRecoveredToday}*" + nl +
@@ -140,7 +173,7 @@ namespace StebumBot.Modules.Covid
                            "__**Past Week:**__" + nl +
                            string.Join(nl, history);
 
-            await ReplyAsync(response);
+            await ReplyAsync(response);*/
         }
     }
 }
