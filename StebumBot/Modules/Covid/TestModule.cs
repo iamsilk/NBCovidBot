@@ -14,15 +14,18 @@ namespace StebumBot.Modules.Covid
         {
             var embedBuilder = new EmbedBuilder();
 
-            embedBuilder.AddField("Test Name 1", "Test Value 1", true)
-                .AddField("Test Name 2", "Test Value 2", true)
-                .AddField("Test Name 3", "Test Value 3\nTest Value 4", true)
-                .WithAuthor(Context.Client.CurrentUser)
-                .WithDescription("Test Description")
+            embedBuilder
+                .WithTitle("New Brunswick COVID-19 Statistics")
+                .WithUrl("https://experience.arcgis.com/experience/8eeb9a2052d641c996dba5de8f25a8aa")
+                .AddField("Total", "Example", true)
+                .AddField("Fredericton", "Example", true)
+                .AddField("Moncton", "Example", true)
+                .AddField("Saint John", "Example", true)
+                .AddField("Another", "Example", true)
+                .AddField("Another", "Example", true)
+                .AddField("Another", "Example", true)
                 .WithFooter("Test footer")
-                .WithCurrentTimestamp()
-                .WithTitle("Test Title")
-                .WithUrl("https://experience.arcgis.com/experience/8eeb9a2052d641c996dba5de8f25a8aa");
+                .WithCurrentTimestamp();
 
             await ReplyAsync(embed: embedBuilder.Build());
         }
