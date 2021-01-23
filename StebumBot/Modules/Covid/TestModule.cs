@@ -16,7 +16,7 @@ namespace StebumBot.Modules.Covid
 
             embedBuilder.AddField("Test Name 1", "Test Value 1", true)
                 .AddField("Test Name 2", "Test Value 2", true)
-                .AddField("Test Name 3", "Test Value 3", true)
+                .AddField("Test Name 3", "Test Value 3\nTest Value 4", true)
                 .WithAuthor(Context.Client.CurrentUser)
                 .WithDescription("Test Description")
                 .WithFooter("Test footer")
