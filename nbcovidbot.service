@@ -1,3 +1,5 @@
+# This service file is used to deploy this bot on an Ubuntu 18.04 VPS.
+
 [Unit]
 Description=A discord bot which displays New Brunswick COVID-19 statistics.
 
