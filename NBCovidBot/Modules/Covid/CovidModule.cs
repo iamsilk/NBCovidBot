@@ -1,12 +1,13 @@
 ﻿using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
-using StebumBot.Modules.Covid.Models;
+using NBCovidBot.Modules.Covid.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ using System.Web;
 using Discord;
 using TimeZoneConverter;
 
-namespace StebumBot.Modules.Covid
+namespace NBCovidBot.Modules.Covid
 {
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public class CovidModule : ModuleBase<SocketCommandContext>
@@ -91,6 +92,41 @@ namespace StebumBot.Modules.Covid
             var date = DateTimeOffset.FromUnixTimeMilliseconds(timestamp);
             return TimeZoneInfo.ConvertTime(date, timeZone);
         }
+        private string JoinColumns(int spacing, params string[][] columns)
+        {
+            var numCols = columns.Length;
+
+            var maxRowLen = columns.Select(
+                column => column.Select(row => row.Length).Prepend(0).Max()).ToArray();
+
+            var numRows = columns.Max(x => x.Length);
+
+            var builder = new StringBuilder();
+
+            for (var i = 0; i < numRows; i++)
+            {
+                for (var j = 0; j < columns.Length; j++)
+                {
+                    var column = columns[j];
+
+                    var spaces = maxRowLen[j] + spacing;
+
+                    if (i < column.Length)
+                    {
+                        var content = column.ElementAt(i);
+                        spaces -= content.Length;
+
+                        builder.Append(content);
+                    }
+
+                    builder.Append(new string(' ', spaces));
+                }
+
+                builder.AppendLine();
+            }
+
+            return builder.ToString();
+        }
 
         [Command("covid")]
         [Summary("View COVID stats")]
@@ -98,12 +134,6 @@ namespace StebumBot.Modules.Covid
         {
             var province = (await QueryData<DailyProvinceCovidInfo>("HealthZones", "HealthZone='Province'"))?.First();
             if (province == null) return;
-
-            var moncton = (await QueryData<DailyCityCovidInfo>("HealthZones", "HealthZone='1'"))?.First();
-            if (moncton == null) return;
-
-            var fredericton = (await QueryData<DailyCityCovidInfo>("HealthZones", "HealthZone='3'"))?.First();
-            if (fredericton == null) return;
 
             var pastWeek = await QueryData<PastCovidInfo>("Covid19DailyCaseStats", "Total>0", "DATE desc");
             if (pastWeek == null) return;
@@ -125,55 +155,69 @@ namespace StebumBot.Modules.Covid
 
                 history[i] = $"{date:MMM dd} - *{pastWeek[i].Active} ({(changes[0] >= 0 ? "+" : "")}{changes[i]})*";
             }
-            
+
+            async Task<string[]> GetColumn(string zoneName, int zoneNum)
+            {
+                var zoneData = (await QueryData<DailyCityCovidInfo>("HealthZones", $"HealthZone='{zoneNum}'"))?.First();
+
+                if (zoneData == null)
+                {
+                    return new[] { zoneName };
+                }
+
+                return new[]
+                {
+                        zoneName,
+                        zoneData.ActiveCases.ToString(),
+                        zoneData.NewToday.ToString(),
+                        zoneData.RecoveryPhase
+                    };
+            }
+
+            var columns = new List<string[]>
+                {
+                    new[]
+                    {
+                        "Zone:",
+                        "Active Cases:",
+                        "New:",
+                        "Recovery Phase:",
+                        "Recovered:"
+                    },
+                    new[]
+                    {
+                        "Overall",
+                        province.ActiveCases.ToString(),
+                        province.NewToday.ToString(),
+                        string.IsNullOrWhiteSpace(province.RecoveryPhase) ? "Mixed" : province.RecoveryPhase,
+                        pastWeek[0].NewRecoveredToday.ToString()
+                    }
+                };
+
+            var zones = new (string zoneName, int zoneNum)[]
+            {
+                    ("Fredericton", 3),
+                    ("Moncton", 1),
+                    ("Edmundston", 4)
+            };
+
+            foreach (var (zoneName, zoneNum) in zones)
+            {
+                columns.Add(await GetColumn(zoneName, zoneNum));
+            }
+
+            var content = JoinColumns(2, columns.ToArray());
+
             var embedBuilder = new EmbedBuilder();
-
-            var totalFieldText =
-                $"Active Cases: *{province.ActiveCases}*\n" +
-                $"New: *{province.NewToday}*\n" +
-                $"Phase: *{province.RecoveryPhase}*\n" +
-                $"Recovered: *{pastWeek[0].NewRecoveredToday}*";
-            
-            var fredFieldText =
-                $"*{fredericton.ActiveCases}*\n" +
-                $"*{fredericton.NewToday}*\n" +
-                $"*{fredericton.RecoveryPhase}*\n";
-
-            var moncFieldText =
-                $"*{moncton.ActiveCases}*\n" +
-                $"*{moncton.NewToday}*\n" +
-                $"*{moncton.RecoveryPhase}*\n";
 
             embedBuilder
                 .WithTitle("New Brunswick COVID-19 Statistics")
                 .WithUrl("https://experience.arcgis.com/experience/8eeb9a2052d641c996dba5de8f25a8aa")
-                .AddField("Total", totalFieldText, true)
-                .AddField("Fredericton", fredFieldText, true)
-                .AddField("Moncton", moncFieldText, true)
+                .AddField("** **", $"```{content}```")
+                .WithFooter("Bot by Stephen White - https://silk.one/", "https://static.silk.one/avatar.png")
                 .WithCurrentTimestamp();
 
             await ReplyAsync(embed: embedBuilder.Build());
-
-            /*
-            var latestDate = GetDate(province.LastUpdate);
-
-            var nl = Environment.NewLine;
-            
-            var response = $"__**{latestDate:MMMM dd, yyyy} (Provincial / Fredericton):**__" + nl +
-                           $"Active Cases: *{province.ActiveCases} ({(changes[0] >= 0 ? "+" : "")}{changes[0]})  /  {city.ActiveCases}*" + nl +
-                           $"New: *{province.NewToday}  /  {city.NewToday}*   Recovered: *{pastWeek[0].NewRecoveredToday}*" + nl +
-                           $"Recovery Phase: *{province.RecoveryPhase}  /  {city.RecoveryPhase}*" + nl +
-                           nl +
-                           $"Total Cases: *{province.TotalCases}*" + nl +
-                           $"Travel Related: *{province.TravelRel}*" + nl +
-                           $"Close Contact: *{province.CloseContact}*" + nl +
-                           $"Community Transmission: *{province.CommTransmission}*" + nl +
-                           $"Under Investigation: *{province.UnderInvestigation}*" + nl +
-                           nl +
-                           "__**Past Week:**__" + nl +
-                           string.Join(nl, history);
-
-            await ReplyAsync(response);*/
         }
     }
 }

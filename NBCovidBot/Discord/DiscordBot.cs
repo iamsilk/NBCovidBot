@@ -4,12 +4,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NCrontab;
-using StebumBot.Commands;
+using NBCovidBot.Commands;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace StebumBot.Discord
+namespace NBCovidBot.Discord
 {
     public class DiscordBot : IHostedService
     {

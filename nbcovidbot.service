@@ -1,15 +1,15 @@
 [Unit]
-Description=A discord bot named Stebum.
+Description=A discord bot which displays New Brunswick COVID-19 statistics.
 
 [Service]
-WorkingDirectory=/var/local/stebum-bot
-ExecStart=/usr/bin/dotnet /usr/local/bin/stebum-bot/StebumBot.dll
+WorkingDirectory=/var/local/NBCovidBot
+ExecStart=/usr/bin/dotnet /usr/local/bin/nbcovidbot/NBCovidBot.dll
 Restart=always
 # Restart service after 10 seconds if the dotnet service crashes:
 RestartSec=10
 KillSignal=SIGINT
 SyslogIdentifier=dotnet-example
-User=stebum
+User=nbcovid
 
 [Install]
 WantedBy=multi-user.target

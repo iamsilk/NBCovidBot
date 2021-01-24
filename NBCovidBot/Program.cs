@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
 
-namespace StebumBot
+namespace NBCovidBot
 {
     public class Program
     {

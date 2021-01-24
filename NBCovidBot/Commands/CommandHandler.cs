@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace StebumBot.Commands
+namespace NBCovidBot.Commands
 {
     public class CommandHandler : IDisposable
     {

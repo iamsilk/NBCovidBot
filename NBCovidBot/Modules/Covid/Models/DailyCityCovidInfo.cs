@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace StebumBot.Modules.Covid.Models
+namespace NBCovidBot.Modules.Covid.Models
 {
     public class DailyCityCovidInfo
     {

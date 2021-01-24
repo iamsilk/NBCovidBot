@@ -14,7 +14,7 @@
           outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}"
       - Name: File
         Args:
-          path: logs/stebum.log
+          path: logs/nbcovidbot.log
           rollingInterval: Day
           rollOnFileSizeLimit: true
           outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss} {Level:u3}][{SourceContext}] {Message:lj}{NewLine}{Exception}"

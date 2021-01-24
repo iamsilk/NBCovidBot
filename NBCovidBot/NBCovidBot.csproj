@@ -3,14 +3,16 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>NBCovidBot</AssemblyName>
+    <RootNamespace>NBCovidBot</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="stebum.yaml" />
+    <None Remove="config.yaml" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="stebum.yaml" />
+    <EmbeddedResource Include="config.yaml" />
     <EmbeddedResource Include="logging.yaml" />
   </ItemGroup>
 

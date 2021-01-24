@@ -1,7 +1,7 @@
 ﻿using NCrontab;
 using System;
 
-namespace StebumBot.Scheduling
+namespace NBCovidBot.Scheduling
 {
     public interface IActionScheduler
     {

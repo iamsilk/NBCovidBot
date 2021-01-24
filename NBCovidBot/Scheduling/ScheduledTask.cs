@@ -2,7 +2,7 @@
 using System;
 using System.Threading;
 
-namespace StebumBot.Scheduling
+namespace NBCovidBot.Scheduling
 {
     public class ScheduledAction
     {

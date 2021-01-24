@@ -7,15 +7,15 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Extensions.Logging;
-using StebumBot.Commands;
-using StebumBot.Discord;
-using StebumBot.Scheduling;
+using NBCovidBot.Commands;
+using NBCovidBot.Discord;
+using NBCovidBot.Scheduling;
 using System;
 using System.IO;
 using System.Resources;
 using System.Threading.Tasks;
 
-namespace StebumBot
+namespace NBCovidBot
 {
     public class Runtime
     {
@@ -56,7 +56,7 @@ namespace StebumBot
 
             if (!File.Exists(resourcePath))
             {
-                using var stream = GetType().Assembly.GetManifestResourceStream("StebumBot." + resource);
+                using var stream = GetType().Assembly.GetManifestResourceStream("NBCovidBot." + resource);
                 using var reader = new StreamReader(stream ?? throw new MissingManifestResourceException("Missing embedded resource"));
 
                 var contents = reader.ReadToEnd();
@@ -86,7 +86,7 @@ namespace StebumBot
 
         private void ConfigureConfiguration(IConfigurationBuilder builder)
         {
-            const string configPath = "stebum.yaml";
+            const string configPath = "config.yaml";
 
             ExportResource(configPath);
 
