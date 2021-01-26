@@ -1,22 +1,17 @@
-﻿using NCrontab;
-using System;
-using System.Threading;
+﻿using System;
 
 namespace NBCovidBot.Scheduling
 {
-    public class ScheduledAction
+    public partial class ActionScheduler
     {
-        public CrontabSchedule Schedule { get; }
-
-        public Action Action { get; }
-
-        public CancellationTokenSource CancellationToken { get; }
-
-        public ScheduledAction(CrontabSchedule schedule, Action action)
+        private class ScheduledAction : ScheduledEntity
         {
-            Schedule = schedule;
-            Action = action;
-            CancellationToken = new CancellationTokenSource();
+            public Action Action { get; }
+
+            public ScheduledAction(string cronSchedule, Action action) : base(cronSchedule)
+            {
+                Action = action;
+            }
         }
     }
 }

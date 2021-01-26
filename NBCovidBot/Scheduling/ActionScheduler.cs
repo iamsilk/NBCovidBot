@@ -1,68 +1,98 @@
-﻿using NCrontab;
+﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace NBCovidBot.Scheduling
 {
-    public class ActionScheduler
+    public partial class ActionScheduler
     {
         private readonly ILogger<ActionScheduler> _logger;
-        private readonly Dictionary<string, ScheduledAction> _scheduledActions;
+        private readonly Dictionary<string, ScheduledEntity> _scheduledEntities;
 
         public ActionScheduler(ILogger<ActionScheduler> logger)
         {
             _logger = logger;
-            _scheduledActions = new Dictionary<string, ScheduledAction>();
+            _scheduledEntities = new Dictionary<string, ScheduledEntity>();
         }
 
-        private static async Task RunScheduledAction(ScheduledAction action)
+        private async Task RunScheduledEntity(ScheduledEntity entity)
         {
-            while (!action.CancellationToken.IsCancellationRequested)
+            while (!entity.CancellationToken.IsCancellationRequested)
             {
                 var now = DateTime.Now;
 
-                await Task.Delay(action.Schedule.GetNextOccurrence(now) - now, action.CancellationToken.Token);
+                var next = entity.Schedule.GetNextOccurrence(now);
 
-                action.Action();
+                var span = next - now;
+
+                _logger.LogDebug($"Executing action {entity.Key} at {next} (in {span}).");
+
+                await Task.Delay(span, entity.CancellationToken.Token);
+
+                switch (entity)
+                {
+                    case ScheduledAction action:
+                        action.Action();
+                        break;
+
+                    case ScheduledTask task:
+                        await task.Task();
+                        break;
+                }
             }
         }
 
-        public void ScheduleAction(string key, CrontabSchedule schedule, Action action)
+        private bool ScheduleEntity(string key, ScheduledEntity entity)
         {
-            ScheduledAction scheduledAction;
+            entity.Key = key;
 
-            lock (_scheduledActions)
+            lock (_scheduledEntities)
             {
-                if (_scheduledActions.ContainsKey(key))
-                    throw new ArgumentException("A scheduled action with the specified key already exists", nameof(key));
+                if (_scheduledEntities.ContainsKey(key))
+                {
+                    _logger.LogWarning("A scheduled action with the specified key already exists: " + nameof(key));
+                    return false;
+                }
 
-                scheduledAction = new ScheduledAction(schedule, action);
-
-                _scheduledActions.Add(key, scheduledAction);
+                _scheduledEntities.Add(key, entity);
             }
 
+            // ReSharper disable once InconsistentlySynchronizedField
             _logger.LogTrace("Scheduled action with key: " + key);
 
-            Task.Run(() => RunScheduledAction(scheduledAction));
+            Task.Run(() => RunScheduledEntity(entity));
+            
+            return true;
         }
 
-        public void UnscheduleAction(string key)
+        public bool ScheduleAction(string key, string cronSchedule, Action action) =>
+            ScheduleEntity(key, new ScheduledAction(cronSchedule, action));
+
+        public bool ScheduleAction(string key, string cronSchedule, Func<Task> task) =>
+            ScheduleEntity(key, new ScheduledTask(cronSchedule, task));
+
+        public bool UnscheduleAction(string key)
         {
-            ScheduledAction scheduledAction;
+            ScheduledEntity scheduledEntity;
 
-            lock (_scheduledActions)
+            lock (_scheduledEntities)
             {
-                if (!_scheduledActions.TryGetValue(key, out scheduledAction))
-                    throw new ArgumentException("A scheduled action with the specified key does not exist", nameof(key));
+                if (!_scheduledEntities.TryGetValue(key, out scheduledEntity))
+                {
+                    _logger.LogWarning("A scheduled action with the specified key does not exist: " + nameof(key));
+                    return false;
+                }
 
-                _scheduledActions.Remove(key);
+                _scheduledEntities.Remove(key);
             }
 
+            // ReSharper disable once InconsistentlySynchronizedField
             _logger.LogTrace("Unscheduled action with key: " + key);
 
-            scheduledAction.CancellationToken.Cancel();
+            scheduledEntity.CancellationToken.Cancel();
+
+            return true;
         }
     }
 }
