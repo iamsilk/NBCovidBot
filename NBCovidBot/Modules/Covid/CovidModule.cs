@@ -134,13 +134,22 @@ namespace NBCovidBot.Modules.Covid
             }
 
             var briefZoneContent = JoinRows(2, rows);
+
+            var verboseProvinceContent = JoinRows(2,
+                new[] {"Total Cases:", provinceDailyInfo.TotalCases.ToString()},
+                new[] {"Travel Related:", provinceDailyInfo.TravelRelated.ToString()},
+                new[] {"Close Contact:", provinceDailyInfo.CloseContact.ToString()},
+                new[] {"Community Transmission:", provinceDailyInfo.CommTransmission.ToString()},
+                new[] {"Under Investigation:", provinceDailyInfo.UnderInvestigation.ToString()});
             
             var embedBuilder = new EmbedBuilder();
 
             embedBuilder
                 .WithTitle("New Brunswick COVID-19 Statistics")
                 .WithUrl("https://experience.arcgis.com/experience/8eeb9a2052d641c996dba5de8f25a8aa")
+                .WithColor(Color.Green)
                 .AddField("Brief Data per Zone:", $"```{briefZoneContent}```")
+                .AddField("Provincial Information:", $"```{verboseProvinceContent}```")
                 .WithFooter("Bot by Stephen White - https://silk.one/", "https://static.silk.one/avatar.png")
                 .WithTimestamp(GetDate(provinceDailyInfo.LastUpdate).ToLocalTime());
 
