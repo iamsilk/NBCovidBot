@@ -100,7 +100,7 @@ namespace NBCovidBot
             services.AddSingleton(this);
             services.AddSingleton<CommandHandler>();
             services.AddSingleton<DiscordSocketClient>();
-            services.AddSingleton(typeof(IActionScheduler), typeof(ActionScheduler));
+            services.AddSingleton<ActionScheduler>();
             services.AddTransient<CommandService>();
             services.AddHostedService<DiscordBot>();
         }

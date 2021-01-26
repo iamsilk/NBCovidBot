@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace NBCovidBot.Scheduling
 {
-    public class ActionScheduler : IActionScheduler
+    public class ActionScheduler
     {
         private readonly ILogger<ActionScheduler> _logger;
         private readonly Dictionary<string, ScheduledAction> _scheduledActions;
