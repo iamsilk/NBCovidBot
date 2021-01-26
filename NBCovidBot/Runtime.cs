@@ -46,9 +46,10 @@ namespace NBCovidBot
                 .ConfigureServices(SetupServices)
                 .UseSerilog();
 
-            Host = hostBuilder.Build();
-
-            await Host.RunAsync();
+            using (Host = hostBuilder.Build())
+            {
+                await Host.RunAsync();
+            }
         }
 
         private void ExportResource(string resource)
