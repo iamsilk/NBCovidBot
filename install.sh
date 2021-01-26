@@ -16,6 +16,9 @@ chmod 775 /usr/local/bin/NBCovidBot
 
 if [ -f "nbcovidbot.service" ]; then
 	cp nbcovidbot.service /etc/systemd/system/nbcovidbot.service
+
+	# Setups auto starting
+	systemctl start nbcovidbot
 else
 	echo "Could not find service file - cannot install service."
 fi
