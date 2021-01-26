@@ -1,20 +1,23 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace NBCovidBot.Modules.Covid.Models
+namespace NBCovidBot.Covid.Models
 {
-    public class DailyCityCovidInfo
+    public class ZoneDailyInfo
     {
+        [JsonIgnore]
+        public HealthZone HealthZone { get; set; }
+
         [JsonPropertyName("RecoveryPhase")]
         public string RecoveryPhase { get; set; }
 
-        [JsonPropertyName("TotalCases")]
-        public int TotalCases { get; set; }
+        [JsonPropertyName("ActiveCases")]
+        public int ActiveCases { get; set; }
 
         [JsonPropertyName("NewToday")]
         public int NewToday { get; set; }
 
-        [JsonPropertyName("ActiveCases")]
-        public int ActiveCases { get; set; }
+        [JsonPropertyName("TotalCases")]
+        public int TotalCases { get; set; }
 
         [JsonPropertyName("Recovered")]
         public int Recovered { get; set; }

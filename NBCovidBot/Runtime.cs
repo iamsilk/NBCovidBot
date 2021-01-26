@@ -14,6 +14,7 @@ using System;
 using System.IO;
 using System.Resources;
 using System.Threading.Tasks;
+using NBCovidBot.Covid;
 
 namespace NBCovidBot
 {
@@ -101,6 +102,7 @@ namespace NBCovidBot
             services.AddSingleton<CommandHandler>();
             services.AddSingleton<DiscordSocketClient>();
             services.AddSingleton<ActionScheduler>();
+            services.AddSingleton<CovidDataProvider>();
             services.AddTransient<CommandService>();
             services.AddHostedService<DiscordBot>();
         }

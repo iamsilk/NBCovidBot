@@ -1,9 +1,9 @@
-﻿
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+// ReSharper disable StringLiteralTypo
 
-namespace NBCovidBot.Modules.Covid.Models
+namespace NBCovidBot.Covid.Models
 {
-    public class PastCovidInfo
+    public class ProvincePastInfo
     {
         [JsonPropertyName("DATE")]
         public long UnixTimestamp { get; set; }
