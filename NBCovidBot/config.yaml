@@ -1,8 +1,5 @@
 ﻿token: "CHANGEME"
 timezone: "Atlantic Standard Time"
 
-schedules:
-  covid: "0 0 0 * *" # every day at midnight
-
 commands:
   prefix: "!"
