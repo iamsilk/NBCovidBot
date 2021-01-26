@@ -11,8 +11,7 @@ mkdir /var/local/NBCovidBot /usr/local/bin/NBCovidBot/
 
 chown nbcovidbot:nbcovidbot /var/local/NBCovidBot
 
-chmod 660 /var/local/NBCovidBot
-chmod 775 /usr/local/bin/NBCovidBot
+chmod 775 /var/local/NBCovidBot /usr/local/bin/NBCovidBot
 
 if [ -f "nbcovidbot.service" ]; then
 	cp nbcovidbot.service /etc/systemd/system/nbcovidbot.service
