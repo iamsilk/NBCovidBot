@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NBCovidBot.Commands;
-using NCrontab;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
