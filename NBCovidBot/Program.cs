@@ -9,7 +9,7 @@ namespace NBCovidBot
         public async Task MainAsync()
         {
             var runtime = new Runtime();
-
+            
             await runtime.InitAsync();
         }
     }

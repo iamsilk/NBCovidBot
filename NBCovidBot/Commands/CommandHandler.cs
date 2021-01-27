@@ -53,7 +53,7 @@ namespace NBCovidBot.Commands
 
             var argPos = 0;
 
-            var prefix = _configuration["commands:prefix"];
+            var prefix = _configuration["Commands:Prefix"];
 
             if (string.IsNullOrWhiteSpace(prefix)) return;
 

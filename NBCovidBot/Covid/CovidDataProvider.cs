@@ -25,6 +25,8 @@ namespace NBCovidBot.Covid
         private List<ProvincePastInfo> _provincePastInfo;
         private List<ZoneRecoveryPhaseInfo> _zonesRecoveryPhaseInfo;
 
+        private List<Func<DataUpdateCallback>> _dataUpdateTasks;
+
         private const string DataQueryActionKey = nameof(CovidDataProvider) + "-Query";
 
         public CovidDataProvider(ActionScheduler actionScheduler, ILogger<CovidDataProvider> logger)
@@ -49,11 +51,13 @@ namespace NBCovidBot.Covid
             _provincePastInfo = new List<ProvincePastInfo>();
             _zonesRecoveryPhaseInfo = new List<ZoneRecoveryPhaseInfo>();
 
+            _dataUpdateTasks = new List<Func<DataUpdateCallback>>();
+
             // Run data query every day at 3:10pm current timezone
-            _actionScheduler.ScheduleAction(DataQueryActionKey, "10 15 * * *", ForceUpdateData);
+            _actionScheduler.ScheduleAction(DataQueryActionKey, "10 15 * * *", () => UpdateData());
 
             // Get data now
-            Task.Run(ForceUpdateData);
+            Task.Run(() => UpdateData(true));
         }
 
         public void Dispose()
@@ -77,7 +81,14 @@ namespace NBCovidBot.Covid
 
         public IReadOnlyCollection<ZoneRecoveryPhaseInfo> GetZonesRecoveryPhaseInfo() =>
             _zonesRecoveryPhaseInfo.AsReadOnly();
-        
+
+        public delegate Task DataUpdateCallback(bool forced);
+
+        public void RunOnDataUpdated(Func<DataUpdateCallback> task)
+        {
+            _dataUpdateTasks.Add(task);
+        }
+
         private async Task<List<T>> QueryMultiple<T>(string service, string query, string orderBy = null, int resultRecordCount = 50) where T : class
         {
             var fields = new List<string>();
@@ -147,7 +158,8 @@ namespace NBCovidBot.Covid
         private async Task<T> QuerySingle<T>(string service, string query, string orderBy = null) where T : class =>
             (await QueryMultiple<T>(service, query, orderBy))?.First();
 
-        public async Task<bool> ForceUpdateData()
+
+        private async Task<bool> UpdateData(bool forced = false)
         {
             var cancel = false;
 
@@ -202,7 +214,21 @@ namespace NBCovidBot.Covid
             _provincePastInfo = past;
             _zonesRecoveryPhaseInfo = zonesRecovery;
 
+            foreach (var task in _dataUpdateTasks)
+            {
+                try
+                {
+                    await task()(forced);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred when running data update task.");
+                }
+            }
+
             return true;
         }
+
+        public Task<bool> ForceUpdateData() => UpdateData(true);
     }
 }

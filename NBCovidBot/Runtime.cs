@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using NBCovidBot.Commands;
 using NBCovidBot.Covid;
 using NBCovidBot.Discord;
+using NBCovidBot.Discord.Announcements;
 using NBCovidBot.Scheduling;
 using Serilog;
 using System;
@@ -19,6 +20,8 @@ namespace NBCovidBot
     public class Runtime
     {
         public IHost Host { get; private set; }
+
+        public IConfiguration Configuration { get; private set; }
 
         public string WorkingDirectory { get; private set; }
 
@@ -86,6 +89,8 @@ namespace NBCovidBot
 
             builder.SetBasePath(WorkingDirectory)
                 .AddYamlFile(configPath, optional: false, reloadOnChange: true);
+
+            Configuration = builder.Build();
         }
 
         private void SetupServices(IServiceCollection services)
@@ -96,7 +101,9 @@ namespace NBCovidBot
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<ActionScheduler>()
                 .AddSingleton<CovidDataProvider>()
+                .AddSingleton<CovidDataFormatter>()
                 .AddTransient<CommandService>()
+                .AddDbContext<AnnouncementsDbContext>()
                 .AddHostedService<DiscordBot>();
         }
     }

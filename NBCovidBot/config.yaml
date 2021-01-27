@@ -1,9 +1,13 @@
-﻿token: "CHANGEME"
+﻿Token: "CHANGEME"
 
-timezone: "Atlantic Standard Time"
+TimeZone: "Atlantic Standard Time"
 
-admins:
+Database:
+  ConnectionStrings:
+    Default: "Server=localhost; Database=NBCovidBot; User Id=username; Password=password"
+
+Admins:
 - "AnExampleAdmin#1234"
 
-commands:
-  prefix: "c!"
+Commands:
+  Prefix: "c!"

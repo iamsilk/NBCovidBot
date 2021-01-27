@@ -1,9 +1,12 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NBCovidBot.Commands;
+using NBCovidBot.Covid;
+using NBCovidBot.Discord.Announcements;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,24 +19,33 @@ namespace NBCovidBot.Discord
         private readonly IConfiguration _configuration;
         private readonly CommandHandler _commandHandler;
         private readonly DiscordSocketClient _client;
+        private readonly CovidDataProvider _dataProvider;
+        private readonly CovidDataFormatter _dataFormatter;
+        private readonly AnnouncementsDbContext _dbContext;
 
         public DiscordBot(
             Runtime runtime,
             ILogger<DiscordBot> logger,
             IConfiguration configuration,
             CommandHandler commandHandler,
-            DiscordSocketClient client)
+            DiscordSocketClient client,
+            CovidDataProvider dataProvider,
+            CovidDataFormatter dataFormatter,
+            AnnouncementsDbContext dbContext)
         {
             _runtime = runtime;
             _logger = logger;
             _configuration = configuration;
             _commandHandler = commandHandler;
             _client = client;
+            _dataProvider = dataProvider;
+            _dataFormatter = dataFormatter;
+            _dbContext = dbContext;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            var token = _configuration["token"];
+            var token = _configuration["Token"];
 
             if (string.IsNullOrWhiteSpace(token) || token == "CHANGEME")
             {
@@ -54,8 +66,13 @@ namespace NBCovidBot.Discord
 
             await _commandHandler.InstallCommandsAsync();
 
-            await _client.LoginAsync(TokenType.Bot, _configuration["token"]);
+            await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
+
+            await _dbContext.Database.MigrateAsync(cancellationToken);
+
+            _dataProvider.RunOnDataUpdated(() => OnDataUpdatedAsync);
+
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
@@ -71,5 +88,25 @@ namespace NBCovidBot.Discord
 
             return Task.CompletedTask;
         }
+
+        private async Task OnDataUpdatedAsync(bool forced)
+        {
+            var announcements = await _dbContext.Announcements.ToListAsync();
+
+            var embed = _dataFormatter.GetEmbed();
+
+            foreach (var announcement in announcements)
+            {
+                var channel = 
+                    _client.GetGuild(announcement.GuildId)
+                    ?.GetTextChannel(announcement.ChannelId);
+
+                if (channel == null) continue;
+
+                await channel.SendMessageAsync(embed: embed);
+            }
+        }
+
+        public Task ForceAnnouncementAsync() => OnDataUpdatedAsync(false);
     }
 }
