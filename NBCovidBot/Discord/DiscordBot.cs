@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NBCovidBot.Commands;
-using NBCovidBot.Covid;
 using NBCovidBot.Discord.Announcements;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,8 +18,6 @@ namespace NBCovidBot.Discord
         private readonly IConfiguration _configuration;
         private readonly CommandHandler _commandHandler;
         private readonly DiscordSocketClient _client;
-        private readonly CovidDataProvider _dataProvider;
-        private readonly CovidDataFormatter _dataFormatter;
         private readonly AnnouncementsDbContext _dbContext;
 
         public DiscordBot(
@@ -29,8 +26,6 @@ namespace NBCovidBot.Discord
             IConfiguration configuration,
             CommandHandler commandHandler,
             DiscordSocketClient client,
-            CovidDataProvider dataProvider,
-            CovidDataFormatter dataFormatter,
             AnnouncementsDbContext dbContext)
         {
             _runtime = runtime;
@@ -38,8 +33,6 @@ namespace NBCovidBot.Discord
             _configuration = configuration;
             _commandHandler = commandHandler;
             _client = client;
-            _dataProvider = dataProvider;
-            _dataFormatter = dataFormatter;
             _dbContext = dbContext;
         }
 
@@ -70,9 +63,6 @@ namespace NBCovidBot.Discord
             await _client.StartAsync();
 
             await _dbContext.Database.MigrateAsync(cancellationToken);
-
-            _dataProvider.RunOnDataUpdated(() => OnDataUpdatedAsync);
-
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
@@ -88,25 +78,5 @@ namespace NBCovidBot.Discord
 
             return Task.CompletedTask;
         }
-
-        private async Task OnDataUpdatedAsync(bool forced)
-        {
-            var announcements = await _dbContext.Announcements.ToListAsync();
-
-            var embed = _dataFormatter.GetEmbed();
-
-            foreach (var announcement in announcements)
-            {
-                var channel = 
-                    _client.GetGuild(announcement.GuildId)
-                    ?.GetTextChannel(announcement.ChannelId);
-
-                if (channel == null) continue;
-
-                await channel.SendMessageAsync(embed: embed);
-            }
-        }
-
-        public Task ForceAnnouncementAsync() => OnDataUpdatedAsync(false);
     }
 }

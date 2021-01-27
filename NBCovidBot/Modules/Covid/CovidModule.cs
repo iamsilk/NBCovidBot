@@ -18,19 +18,19 @@ namespace NBCovidBot.Modules.Covid
         private readonly CovidDataFormatter _dataFormatter;
         private readonly IConfiguration _configuration;
         private readonly AnnouncementsDbContext _dbContext;
-        private readonly DiscordBot _discordBot;
+        private readonly CovidAnnouncer _covidAnnouncer;
 
         public CovidModule(CovidDataProvider dataProvider,
             CovidDataFormatter dataFormatter,
             IConfiguration configuration,
             AnnouncementsDbContext dbContext,
-            DiscordBot discordBot)
+            CovidAnnouncer covidAnnouncer)
         {
             _dataProvider = dataProvider;
             _dataFormatter = dataFormatter;
             _configuration = configuration;
             _dbContext = dbContext;
-            _discordBot = discordBot;
+            _covidAnnouncer = covidAnnouncer;
         }
 
         private bool IsBotAdmin()
@@ -112,7 +112,7 @@ namespace NBCovidBot.Modules.Covid
         {
             if (!IsBotAdmin()) return;
 
-            await _discordBot.ForceAnnouncementAsync();
+            await _covidAnnouncer.ForceAnnouncementAsync();
         }
     }
 }

@@ -102,6 +102,7 @@ namespace NBCovidBot
                 .AddSingleton<ActionScheduler>()
                 .AddSingleton<CovidDataProvider>()
                 .AddSingleton<CovidDataFormatter>()
+                .AddSingleton<CovidAnnouncer>()
                 .AddTransient<CommandService>()
                 .AddDbContext<AnnouncementsDbContext>()
                 .AddHostedService<DiscordBot>();
