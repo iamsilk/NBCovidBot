@@ -61,13 +61,6 @@ namespace NBCovidBot.Discord
 
             await _client.LoginAsync(TokenType.Bot, _configuration["token"]);
             await _client.StartAsync();
-
-            var schedule = CrontabSchedule.TryParse(_configuration["schedules:covid"]);
-
-            if (schedule == null)
-            {
-                _logger.LogWarning("Cron schedule for !covid is invalid. Schedule will not run.");
-            }
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
