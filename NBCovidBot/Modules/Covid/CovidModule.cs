@@ -3,7 +3,9 @@ using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using NBCovidBot.Covid;
+using NBCovidBot.Covid.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -91,6 +93,17 @@ namespace NBCovidBot.Modules.Covid
                 return;
             }
 
+            var zonesRecoveryPhases = new List<ZoneRecoveryPhaseInfo>();
+
+            foreach (var recoveryPhaseInfo in _dataProvider.GetZonesRecoveryPhaseInfo())
+            {
+                if (zonesDailyInfo.Any(x =>
+                    x.HealthZone.Title.Equals(recoveryPhaseInfo.CommunityName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    zonesRecoveryPhases.Add(recoveryPhaseInfo);
+                }
+            }
+
             const int extraRowCount = 3;
             var rows = new string[zonesDailyInfo.Count + extraRowCount][];
 
@@ -116,20 +129,21 @@ namespace NBCovidBot.Modules.Covid
             {
                 "Overall",
                 provinceDailyInfo.ActiveCases.ToString(),
-                provinceDailyInfo.NewToday.ToString(),
-                string.IsNullOrWhiteSpace(provinceDailyInfo.RecoveryPhase) ? "Mixed" : provinceDailyInfo.RecoveryPhase
+                provinceDailyInfo.NewToday.ToString()
             };
 
             for (; i < rows.Length; i++)
             {
                 var zone = zonesDailyInfo[i - extraRowCount];
 
+                var recoveryPhase = zonesRecoveryPhases.FirstOrDefault(x => x.HealthZone == zone.HealthZone.ZoneNumber);
+
                 rows[i] = new[]
                 {
                     zone.HealthZone.Title,
                     zone.ActiveCases.ToString(),
                     zone.NewToday.ToString(),
-                    zone.RecoveryPhase
+                    recoveryPhase == null ? "Unknown" : recoveryPhase.RecoveryPhase
                 };
             }
 

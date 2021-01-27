@@ -7,9 +7,6 @@ namespace NBCovidBot.Covid.Models
         [JsonIgnore]
         public HealthZone HealthZone { get; set; }
 
-        [JsonPropertyName("RecoveryPhase")]
-        public string RecoveryPhase { get; set; }
-
         [JsonPropertyName("ActiveCases")]
         public int ActiveCases { get; set; }
 

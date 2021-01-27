@@ -3,6 +3,7 @@ using NBCovidBot.Covid.Models;
 using NBCovidBot.Scheduling;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -22,6 +23,7 @@ namespace NBCovidBot.Covid
         private List<ZoneDailyInfo> _zonesDailyInfo;
         private ProvinceDailyInfo _provinceDailyInfo;
         private List<ProvincePastInfo> _provincePastInfo;
+        private List<ZoneRecoveryPhaseInfo> _zonesRecoveryPhaseInfo;
 
         private const string DataQueryActionKey = nameof(CovidDataProvider) + "-Query";
 
@@ -45,6 +47,7 @@ namespace NBCovidBot.Covid
 
             _zonesDailyInfo = new List<ZoneDailyInfo>();
             _provincePastInfo = new List<ProvincePastInfo>();
+            _zonesRecoveryPhaseInfo = new List<ZoneRecoveryPhaseInfo>();
 
             // Run data query every day at 3:10pm current timezone
             _actionScheduler.ScheduleAction(DataQueryActionKey, "10 15 * * *", UpdateData);
@@ -71,11 +74,24 @@ namespace NBCovidBot.Covid
         public ProvinceDailyInfo GetProvinceDailyInfo() => _provinceDailyInfo;
 
         public IReadOnlyCollection<ProvincePastInfo> GetProvincePastInfo() => _provincePastInfo.AsReadOnly();
+
+        public IReadOnlyCollection<ZoneRecoveryPhaseInfo> GetZonesRecoveryPhaseInfo() =>
+            _zonesRecoveryPhaseInfo.AsReadOnly();
         
-        private async Task<List<T>> QueryMultiple<T>(string service, string query, string orderBy = null) where T : class
+        private async Task<List<T>> QueryMultiple<T>(string service, string query, string orderBy = null, int resultRecordCount = 50) where T : class
         {
-            var fields = typeof(T).GetProperties().Select(x => x.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name)
-                .Where(name => name != null);
+            var fields = new List<string>();
+            
+            foreach (var property in typeof(T).GetProperties())
+            {
+                if (property.GetCustomAttribute<JsonIgnoreAttribute>() != null) continue;
+
+                var name = property.GetCustomAttribute<JsonPropertyNameAttribute>();
+
+                if (name == null) continue;
+
+                fields.Add(name.Name);
+            }
 
             var requestParams = new Dictionary<string, object>()
             {
@@ -84,7 +100,7 @@ namespace NBCovidBot.Covid
                 {"returnGeometry", false},
                 {"outFields", string.Join(',', fields)},
                 {"resultOffset", 0},
-                {"resultRecordCount", 50},
+                {"resultRecordCount", resultRecordCount},
                 {"resultType", "standard"},
                 {"cacheHint", true}
             };
@@ -98,8 +114,10 @@ namespace NBCovidBot.Covid
 
             using var client = new HttpClient();
 
-            var response = await client.GetAsync(requestUrl + string.Join('&',
-                requestParams.Select(x => x.Key + "=" + HttpUtility.UrlEncode(x.Value.ToString()))));
+            requestUrl += string.Join('&',
+                requestParams.Select(x => x.Key + "=" + HttpUtility.UrlEncode(x.Value.ToString())));
+
+            var response = await client.GetAsync(requestUrl);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -110,7 +128,11 @@ namespace NBCovidBot.Covid
 
             await using var stream = await response.Content.ReadAsStreamAsync();
 
-            var root = await JsonSerializer.DeserializeAsync<Root<T>>(stream);
+            using var reader = new StreamReader(stream);
+
+            var content = await reader.ReadToEndAsync();
+
+            var root = JsonSerializer.Deserialize<Root<T>>(content);
 
             if (root?.Features == null || root.Features.Count(x => x?.Target != null) == 0)
             {
@@ -158,11 +180,27 @@ namespace NBCovidBot.Covid
 
             var past = await QueryMultiple<ProvincePastInfo>("Covid19DailyCaseStats", "Total>0", "DATE desc");
 
+            if (past == null || past.Count == 0)
+            {
+                _logger.LogWarning("Unable to retrieve past provincial daily case stats.");
+                cancel = true;
+            }
+
+            var zonesRecovery =
+                await QueryMultiple<ZoneRecoveryPhaseInfo>("RecoveryPhases", "'1'='1'", resultRecordCount: 4000);
+
+            if (zonesRecovery == null || zonesRecovery.Count == 0)
+            {
+                _logger.LogWarning("Unable to retrieve zone recovery information.");
+                cancel = true;
+            }
+
             if (cancel) return;
 
             _zonesDailyInfo = zones;
             _provinceDailyInfo = province;
             _provincePastInfo = past;
+            _zonesRecoveryPhaseInfo = zonesRecovery;
         }
     }
 }
