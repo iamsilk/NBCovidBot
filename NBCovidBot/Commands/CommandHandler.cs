@@ -73,7 +73,7 @@ namespace NBCovidBot.Commands
 
             if (result.IsSuccess)
             {
-                _logger.LogDebug($"Successfully executed command {message.Content} in {stopwatch.ElapsedMilliseconds}");
+                _logger.LogDebug($"Successfully executed command {message.Content} in {stopwatch.ElapsedMilliseconds} ms");
             }
             else
             {
