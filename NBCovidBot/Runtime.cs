@@ -5,16 +5,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Serilog;
-using Serilog.Extensions.Logging;
 using NBCovidBot.Commands;
+using NBCovidBot.Covid;
 using NBCovidBot.Discord;
 using NBCovidBot.Scheduling;
+using Serilog;
+using Serilog.Extensions.Logging;
 using System;
 using System.IO;
 using System.Resources;
 using System.Threading.Tasks;
-using NBCovidBot.Covid;
 
 namespace NBCovidBot
 {
@@ -56,15 +56,14 @@ namespace NBCovidBot
         {
             var resourcePath = Path.Combine(WorkingDirectory, resource);
 
-            if (!File.Exists(resourcePath))
-            {
-                using var stream = GetType().Assembly.GetManifestResourceStream("NBCovidBot." + resource);
-                using var reader = new StreamReader(stream ?? throw new MissingManifestResourceException("Missing embedded resource"));
+            if (File.Exists(resourcePath)) return;
 
-                var contents = reader.ReadToEnd();
+            using var stream = GetType().Assembly.GetManifestResourceStream("NBCovidBot." + resource);
+            using var reader = new StreamReader(stream ?? throw new MissingManifestResourceException("Missing embedded resource"));
 
-                File.WriteAllText(resourcePath, contents);
-            }
+            var contents = reader.ReadToEnd();
+
+            File.WriteAllText(resourcePath, contents);
         }
 
         private void SetupSerilog()
@@ -98,14 +97,14 @@ namespace NBCovidBot
 
         private void SetupServices(IServiceCollection services)
         {
-            services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
-            services.AddSingleton(this);
-            services.AddSingleton<CommandHandler>();
-            services.AddSingleton<DiscordSocketClient>();
-            services.AddSingleton<ActionScheduler>();
-            services.AddSingleton<CovidDataProvider>();
-            services.AddTransient<CommandService>();
-            services.AddHostedService<DiscordBot>();
+            services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true))
+                .AddSingleton(this)
+                .AddSingleton<CommandHandler>()
+                .AddSingleton<DiscordSocketClient>()
+                .AddSingleton<ActionScheduler>()
+                .AddSingleton<CovidDataProvider>()
+                .AddTransient<CommandService>()
+                .AddHostedService<DiscordBot>();
         }
     }
 }
