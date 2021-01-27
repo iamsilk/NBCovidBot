@@ -33,7 +33,7 @@ namespace NBCovidBot.Modules.Covid
             return TimeZoneInfo.ConvertTime(date, timeZone);
         }
 
-        private string JoinRows(int spacing, params string[][] rows)
+        private static string JoinRows(int spacing, params string[][] rows)
         {
             var numCols = rows.Max(x => x.Length);
 

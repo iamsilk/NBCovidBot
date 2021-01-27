@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NBCovidBot.Commands;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,22 +16,19 @@ namespace NBCovidBot.Discord
         private readonly IConfiguration _configuration;
         private readonly CommandHandler _commandHandler;
         private readonly DiscordSocketClient _client;
-        private readonly IServiceProvider _services;
 
         public DiscordBot(
             Runtime runtime,
             ILogger<DiscordBot> logger,
             IConfiguration configuration,
             CommandHandler commandHandler,
-            DiscordSocketClient client,
-            IServiceProvider services)
+            DiscordSocketClient client)
         {
             _runtime = runtime;
             _logger = logger;
             _configuration = configuration;
             _commandHandler = commandHandler;
             _client = client;
-            _services = services;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)

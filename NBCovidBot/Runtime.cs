@@ -4,13 +4,11 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using NBCovidBot.Commands;
 using NBCovidBot.Covid;
 using NBCovidBot.Discord;
 using NBCovidBot.Scheduling;
 using Serilog;
-using Serilog.Extensions.Logging;
 using System;
 using System.IO;
 using System.Resources;
@@ -21,9 +19,6 @@ namespace NBCovidBot
     public class Runtime
     {
         public IHost Host { get; private set; }
-
-        private ILoggerFactory _loggerFactory;
-        private ILogger<Runtime> _logger;
 
         public string WorkingDirectory { get; private set; }
 
@@ -80,9 +75,7 @@ namespace NBCovidBot
             var loggerConfiguration = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration);
 
-            var serilogLogger = Log.Logger = loggerConfiguration.CreateLogger();
-            _loggerFactory = new SerilogLoggerFactory(serilogLogger);
-            _logger = _loggerFactory.CreateLogger<Runtime>();
+            Log.Logger = loggerConfiguration.CreateLogger();
         }
 
         private void ConfigureConfiguration(IConfigurationBuilder builder)

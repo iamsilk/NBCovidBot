@@ -134,7 +134,7 @@ namespace NBCovidBot.Covid
 
             var root = JsonSerializer.Deserialize<Root<T>>(content);
 
-            if (root?.Features == null || root.Features.Count(x => x?.Target != null) == 0)
+            if (root?.Features == null || root.Features.All(x => x?.Target == null))
             {
                 _logger.LogWarning($"Server returned unexpected result. Could not parse {typeof(T).Name}");
 
