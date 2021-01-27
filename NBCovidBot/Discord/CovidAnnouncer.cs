@@ -26,6 +26,8 @@ namespace NBCovidBot.Discord
 
         private async Task OnDataUpdatedAsync(bool forced)
         {
+            if (forced) return;
+
             var announcements = await _dbContext.Announcements.ToListAsync();
 
             var embed = _dataFormatter.GetEmbed();
