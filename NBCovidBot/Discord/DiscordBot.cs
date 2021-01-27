@@ -3,8 +3,8 @@ using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NCrontab;
 using NBCovidBot.Commands;
+using NCrontab;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +13,7 @@ namespace NBCovidBot.Discord
 {
     public class DiscordBot : IHostedService
     {
+        private readonly Runtime _runtime;
         private readonly ILogger<DiscordBot> _logger;
         private readonly IConfiguration _configuration;
         private readonly CommandHandler _commandHandler;
@@ -20,12 +21,14 @@ namespace NBCovidBot.Discord
         private readonly IServiceProvider _services;
 
         public DiscordBot(
+            Runtime runtime,
             ILogger<DiscordBot> logger,
             IConfiguration configuration,
             CommandHandler commandHandler,
             DiscordSocketClient client,
             IServiceProvider services)
         {
+            _runtime = runtime;
             _logger = logger;
             _configuration = configuration;
             _commandHandler = commandHandler;
@@ -41,7 +44,14 @@ namespace NBCovidBot.Discord
             {
                 _logger.LogCritical("A token must be specified in the config file.");
 
-                Environment.Exit(-1);
+                // We must close the application by directly stopping the runtime
+                // as if we call Environment.Exit, the method won't return until the
+                // application has exited. The application however won't exit until this
+                // method has returned resulting the application locking.
+
+                // ReSharper disable once MethodSupportsCancellation
+                await _runtime.Host.StopAsync();
+
                 return;
             }
 

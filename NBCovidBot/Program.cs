@@ -12,8 +12,6 @@ namespace NBCovidBot
             var runtime = new Runtime();
 
             await runtime.InitAsync();
-
-            await runtime.Host.WaitForShutdownAsync();
         }
     }
 }
