@@ -169,5 +169,27 @@ namespace NBCovidBot.Modules.Covid
 
             await ReplyAsync(embed: embedBuilder.Build());
         }
+
+        [Command("forceupdate")]
+        [Summary("Force update of COVID stats")]
+        public async Task ForceUpdateAsync()
+        {
+            var user = Context.User;
+
+            var admins = _configuration.GetSection("admins").Get<string[]>();
+
+            if (admins == null || !admins.Contains(user.ToString())) return;
+            
+            var success = await _dataProvider.ForceUpdateData();
+
+            if (success)
+            {
+                await ReplyAsync("Successfully forced data update.");
+            }
+            else
+            {
+                await ReplyAsync("Error occurred when forcing data update.");
+            }
+        }
     }
 }

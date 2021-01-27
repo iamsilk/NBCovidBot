@@ -2,5 +2,8 @@
 
 timezone: "Atlantic Standard Time"
 
+admins:
+- "AnExampleAdmin#1234"
+
 commands:
   prefix: "c!"

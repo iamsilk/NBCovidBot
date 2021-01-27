@@ -50,10 +50,10 @@ namespace NBCovidBot.Covid
             _zonesRecoveryPhaseInfo = new List<ZoneRecoveryPhaseInfo>();
 
             // Run data query every day at 3:10pm current timezone
-            _actionScheduler.ScheduleAction(DataQueryActionKey, "10 15 * * *", UpdateData);
+            _actionScheduler.ScheduleAction(DataQueryActionKey, "10 15 * * *", ForceUpdateData);
 
             // Get data now
-            Task.Run(UpdateData);
+            Task.Run(ForceUpdateData);
         }
 
         public void Dispose()
@@ -147,7 +147,7 @@ namespace NBCovidBot.Covid
         private async Task<T> QuerySingle<T>(string service, string query, string orderBy = null) where T : class =>
             (await QueryMultiple<T>(service, query, orderBy))?.First();
 
-        private async Task UpdateData()
+        public async Task<bool> ForceUpdateData()
         {
             var cancel = false;
 
@@ -195,12 +195,14 @@ namespace NBCovidBot.Covid
                 cancel = true;
             }
 
-            if (cancel) return;
+            if (cancel) return false;
 
             _zonesDailyInfo = zones;
             _provinceDailyInfo = province;
             _provincePastInfo = past;
             _zonesRecoveryPhaseInfo = zonesRecovery;
+
+            return true;
         }
     }
 }
