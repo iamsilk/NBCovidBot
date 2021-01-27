@@ -1,5 +1,6 @@
 ﻿token: "CHANGEME"
+
 timezone: "Atlantic Standard Time"
 
 commands:
-  prefix: "!"
+  prefix: "c!"
