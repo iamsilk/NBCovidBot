@@ -98,7 +98,10 @@ namespace NBCovidBot
             services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true))
                 .AddSingleton(this)
                 .AddSingleton<CommandHandler>()
-                .AddSingleton<DiscordSocketClient>()
+                .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig()
+                {
+                    AlwaysDownloadUsers = true
+                }))
                 .AddSingleton<ActionScheduler>()
                 .AddSingleton<CovidDataProvider>()
                 .AddSingleton<CovidDataFormatter>()

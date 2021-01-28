@@ -52,7 +52,11 @@ namespace NBCovidBot.Modules.Covid
                 return;
             }
 
-            await ReplyAsync(embed: embed);
+            var message = await ReplyAsync(embed: embed);
+
+            if (message == null) return;
+
+            await _dataFormatter.AddReactions(message);
         }
 
         [Command("forceupdate")]

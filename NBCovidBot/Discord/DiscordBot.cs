@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NBCovidBot.Commands;
 using NBCovidBot.Discord.Announcements;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -56,7 +57,8 @@ namespace NBCovidBot.Discord
             }
 
             _client.Log += OnLog;
-
+            _client.ReactionAdded += OnReactionAdded;
+            
             await _commandHandler.InstallCommandsAsync();
 
             await _client.LoginAsync(TokenType.Bot, token);
@@ -77,6 +79,53 @@ namespace NBCovidBot.Discord
             _logger.LogInformation(arg.Message);
 
             return Task.CompletedTask;
+        }
+
+        private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> cacheableMessage, ISocketMessageChannel channel,
+            SocketReaction reaction)
+        {
+            var message = await cacheableMessage.DownloadAsync();
+
+            // Check if reaction is for one of the bot's messages
+            if (_client.CurrentUser.Id != message.Author.Id) return;
+
+            // Check if reaction is from bot
+            if (_client.CurrentUser.Id == reaction.UserId) return;
+            
+            if (!(message.Channel is SocketTextChannel guildChannel)) return;
+
+            var parts = reaction.Emote.ToString()?.Split(':') ?? new string[0];
+
+            var isSubscribing = reaction.Emote.Name == _configuration["UserUpdates:Reactions:Subscribe"];
+            var isUnsubscribing = reaction.Emote.Name == _configuration["UserUpdates:Reactions:Unsubscribe"];
+
+            // Check if emote means anything
+            if (!isSubscribing && !isUnsubscribing) return;
+            
+            var roleName = _configuration["UserUpdates:RoleName"];
+            
+            IRole role = guildChannel.Guild.Roles.FirstOrDefault(x => x.Name == roleName);
+
+            role ??= await guildChannel.Guild.CreateRoleAsync(roleName, GuildPermissions.None, isMentionable: false);
+
+            if (role != null)
+            {
+                var user = guildChannel.Guild.GetUser(reaction.UserId);
+
+                if (user != null)
+                {
+                    if (isSubscribing)
+                    {
+                        await user.AddRoleAsync(role);
+                    }
+                    else
+                    {
+                        await user.RemoveRoleAsync(role);
+                    }
+                }
+            }
+
+            await message.RemoveReactionAsync(reaction.Emote, reaction.UserId);
         }
     }
 }

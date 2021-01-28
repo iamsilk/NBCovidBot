@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using TimeZoneConverter;
 
 namespace NBCovidBot.Covid
@@ -160,6 +161,17 @@ namespace NBCovidBot.Covid
                 .WithTimestamp(GetDate(provinceDailyInfo.LastUpdate).ToLocalTime());
 
             return embedBuilder.Build();
+        }
+
+        public async Task AddReactions(IUserMessage message)
+        {
+            var emotes = new IEmote[]
+            {
+                new Emoji(_configuration["UserUpdates:Reactions:Subscribe"]),
+                new Emoji(_configuration["UserUpdates:Reactions:Unsubscribe"])
+            };
+
+            await message.AddReactionsAsync(emotes);
         }
     }
 }

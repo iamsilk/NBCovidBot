@@ -2,12 +2,18 @@
 
 TimeZone: "Atlantic Standard Time"
 
+Commands:
+  Prefix: "c!"
+
+UserUpdates:
+  Reactions:
+    Subscribe: "✅"
+    Unsubscribe: "❌"
+  RoleName: "covid-updates"
+
 Database:
   ConnectionStrings:
     Default: "Server=localhost; Database=NBCovidBot; User Id=username; Password=password"
 
 Admins:
 - "AnExampleAdmin#1234"
-
-Commands:
-  Prefix: "c!"

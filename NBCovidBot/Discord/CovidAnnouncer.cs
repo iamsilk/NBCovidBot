@@ -1,4 +1,5 @@
 ﻿using Discord.WebSocket;
+using Microsoft.Extensions.Configuration;
 using NBCovidBot.Covid;
 using NBCovidBot.Discord.Announcements;
 using System.Linq;
@@ -11,15 +12,18 @@ namespace NBCovidBot.Discord
         private readonly AnnouncementsDbContext _dbContext;
         private readonly CovidDataFormatter _dataFormatter;
         private readonly DiscordSocketClient _client;
+        private IConfiguration _configuration;
 
         public CovidAnnouncer(AnnouncementsDbContext dbContext,
             CovidDataProvider dataProvider,
             CovidDataFormatter dataFormatter,
-            DiscordSocketClient client)
+            DiscordSocketClient client,
+            IConfiguration configuration)
         {
             _dbContext = dbContext;
             _dataFormatter = dataFormatter;
             _client = client;
+            _configuration = configuration;
 
             dataProvider.RunOnDataUpdated(() => OnDataUpdatedAsync);
         }
@@ -40,7 +44,13 @@ namespace NBCovidBot.Discord
 
                 if (channel == null) continue;
 
-                await channel.SendMessageAsync(embed: embed);
+                var role = channel.Guild.Roles.FirstOrDefault(x => x.Name == _configuration["UserUpdates:RoleName"]);
+
+                var message = await channel.SendMessageAsync(role?.Mention, embed: embed);
+
+                if (message == null) continue;
+
+                await _dataFormatter.AddReactions(message);
             }
         }
 
