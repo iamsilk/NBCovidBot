@@ -1,6 +1,8 @@
 # NBCovidBot
 A Discord bot which outputs up-to-date COVID-19 statistics for the province of New Brunswick.
 
+[Add the bot to your discord server](https://discord.com/oauth2/authorize?client_id=781388821753364521&permissions=268594240&scope=bot)
+
 ## Features
 - Provides daily updates when new COVID data is released.
 - Reaction-based role mentions to ping users in daily updates.
