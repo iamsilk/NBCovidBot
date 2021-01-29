@@ -1,6 +1,5 @@
 ﻿using Discord.Commands;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Configuration;
 using NBCovidBot.Covid;
 using NBCovidBot.Discord.Announcements;
 using NBCovidBot.Discord.Announcements.Models;
@@ -15,19 +14,16 @@ namespace NBCovidBot.Discord.Modules
     {
         private readonly CovidDataProvider _dataProvider;
         private readonly CovidDataFormatter _dataFormatter;
-        private readonly IConfiguration _configuration;
         private readonly AnnouncementsDbContext _dbContext;
         private readonly CovidAnnouncer _covidAnnouncer;
 
         public CovidModule(CovidDataProvider dataProvider,
             CovidDataFormatter dataFormatter,
-            IConfiguration configuration,
             AnnouncementsDbContext dbContext,
             CovidAnnouncer covidAnnouncer)
         {
             _dataProvider = dataProvider;
             _dataFormatter = dataFormatter;
-            _configuration = configuration;
             _dbContext = dbContext;
             _covidAnnouncer = covidAnnouncer;
         }
