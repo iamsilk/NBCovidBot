@@ -1,10 +1,10 @@
-﻿using Discord;
-using Discord.Commands;
+﻿using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using NBCovidBot.Covid;
 using NBCovidBot.Discord.Announcements;
 using NBCovidBot.Discord.Announcements.Models;
+using NBCovidBot.Discord.Preconditions;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -32,19 +32,11 @@ namespace NBCovidBot.Discord.Modules
             _covidAnnouncer = covidAnnouncer;
         }
 
-        private bool IsBotAdmin()
-        {
-            var admins = _configuration.GetSection("Admins").Get<string[]>();
-
-            return admins != null && admins.Contains(Context.User.ToString());
-        }
-
         [Command("covid")]
         [Summary("View COVID stats")]
+        [RequireBotOrServerAdmin]
         public async Task CovidAsync()
         {
-            if (!IsBotAdmin()) return;
-
             var embed = _dataFormatter.GetEmbed();
 
             if (embed == null)
@@ -62,10 +54,9 @@ namespace NBCovidBot.Discord.Modules
 
         [Command("forceupdate")]
         [Summary("Force update of COVID stats")]
+        [RequireBotAdmin]
         public async Task ForceUpdateAsync()
         {
-            if (!IsBotAdmin()) return;
-            
             var success = await _dataProvider.ForceUpdateData();
 
             if (success)
@@ -80,7 +71,7 @@ namespace NBCovidBot.Discord.Modules
         
         [Command("dailyupdate")]
         [Summary("Adds/removes current channel to/from list of daily updated channels")]
-        [RequireUserPermission(GuildPermission.Administrator)]
+        [RequireBotOrServerAdmin]
         public async Task DailyUpdateAsync()
         {
             var existingRecord = await _dbContext.Announcements.FirstOrDefaultAsync(x =>
