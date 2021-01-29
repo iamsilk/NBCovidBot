@@ -44,6 +44,8 @@ namespace NBCovidBot.Modules.Covid
         [Summary("View COVID stats")]
         public async Task CovidAsync()
         {
+            if (!IsBotAdmin()) return;
+
             var embed = _dataFormatter.GetEmbed();
 
             if (embed == null)
