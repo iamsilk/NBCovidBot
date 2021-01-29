@@ -104,10 +104,9 @@ namespace NBCovidBot.Discord.Modules
 
         [Command("forcedailyupdate")]
         [Summary("Forces a daily update among all subscribed channels")]
+        [RequireBotAdmin]
         public async Task ForceDailyUpdateAsync()
         {
-            if (!IsBotAdmin()) return;
-
             await _covidAnnouncer.ForceAnnouncementAsync();
         }
     }
