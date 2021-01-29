@@ -12,7 +12,7 @@ namespace NBCovidBot.Discord
         private readonly AnnouncementsDbContext _dbContext;
         private readonly CovidDataFormatter _dataFormatter;
         private readonly DiscordSocketClient _client;
-        private IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
 
         public CovidAnnouncer(AnnouncementsDbContext dbContext,
             CovidDataProvider dataProvider,
