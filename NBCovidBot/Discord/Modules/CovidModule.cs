@@ -3,13 +3,12 @@ using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Configuration;
 using NBCovidBot.Covid;
-using NBCovidBot.Discord;
 using NBCovidBot.Discord.Announcements;
 using NBCovidBot.Discord.Announcements.Models;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace NBCovidBot.Modules.Covid
+namespace NBCovidBot.Discord.Modules
 {
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public class CovidModule : ModuleBase<SocketCommandContext>
