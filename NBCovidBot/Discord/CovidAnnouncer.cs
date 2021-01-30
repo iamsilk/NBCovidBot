@@ -1,4 +1,5 @@
-﻿using Discord.WebSocket;
+﻿using Discord;
+using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using NBCovidBot.Covid;
 using NBCovidBot.Discord.Announcements;
@@ -28,13 +29,9 @@ namespace NBCovidBot.Discord
             dataProvider.RunOnDataUpdated(() => OnDataUpdatedAsync);
         }
 
-        private async Task OnDataUpdatedAsync(bool forced)
+        public async Task AnnounceAsync(Embed embed, bool addReactions = true)
         {
-            if (forced) return;
-
             var announcements = await _dbContext.Announcements.ToListAsync();
-
-            var embed = _dataFormatter.GetEmbed();
 
             foreach (var announcement in announcements)
             {
@@ -54,6 +51,15 @@ namespace NBCovidBot.Discord
             }
         }
 
-        public Task ForceAnnouncementAsync() => OnDataUpdatedAsync(false);
+        private async Task OnDataUpdatedAsync(bool forced)
+        {
+            if (forced) return;
+
+            var embed = _dataFormatter.GetEmbed();
+
+            await AnnounceAsync(embed);
+        }
+
+        public Task ForceDataAnnouncementAsync() => OnDataUpdatedAsync(false);
     }
 }

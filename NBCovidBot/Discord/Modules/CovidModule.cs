@@ -1,9 +1,11 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 using JetBrains.Annotations;
 using NBCovidBot.Covid;
 using NBCovidBot.Discord.Announcements;
 using NBCovidBot.Discord.Announcements.Models;
 using NBCovidBot.Discord.Preconditions;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -103,7 +105,24 @@ namespace NBCovidBot.Discord.Modules
         [RequireBotAdmin]
         public async Task ForceDailyUpdateAsync()
         {
-            await _covidAnnouncer.ForceAnnouncementAsync();
+            await _covidAnnouncer.ForceDataAnnouncementAsync();
+        }
+
+        [Command("announce")]
+        [Summary("Sends a custom announcement to all daily update channels")]
+        [RequireBotAdmin]
+        public async Task AnnounceAsync(string title, [Remainder] string message)
+        {
+            var embedBuilder = new EmbedBuilder();
+
+            embedBuilder
+                .WithTitle(title)
+                .WithColor(Color.Green)
+                .WithDescription(message)
+                .WithFooter("Bot by Stephen White - https://silk.one/", "https://static.silk.one/avatar.png")
+                .WithTimestamp(DateTime.Now);
+
+            await _covidAnnouncer.AnnounceAsync(embedBuilder.Build(), false);
         }
     }
 }
