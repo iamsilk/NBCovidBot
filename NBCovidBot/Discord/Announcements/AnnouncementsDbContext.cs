@@ -1,5 +1,5 @@
 ﻿// Uncomment definition when generating migrations
-#define MIGRATION_GENERATION
+//#define MIGRATION_GENERATION
 
 using Microsoft.EntityFrameworkCore;
 using NBCovidBot.Discord.Announcements.Models;
