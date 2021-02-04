@@ -26,7 +26,7 @@ namespace NBCovidBot.Covid
         {
             var timeZone = TZConvert.GetTimeZoneInfo(_configuration["TimeZone"]);
             var date = DateTimeOffset.FromUnixTimeMilliseconds(timestamp);
-            return TimeZoneInfo.ConvertTime(date, timeZone);
+            return date.Subtract(timeZone.GetUtcOffset(date));
         }
 
         private static string JoinRows(int spacing, params string[][] rows)
@@ -157,8 +157,10 @@ namespace NBCovidBot.Covid
                 .WithColor(Color.Green)
                 .AddField("Brief Data per Zone:", $"```{briefZoneContent}```")
                 .AddField("Provincial Information:", $"```{verboseProvinceContent}```")
-                .WithFooter("Bot by Stephen White - https://silk.one/", "https://static.silk.one/avatar.png")
-                .WithTimestamp(GetDate(provinceDailyInfo.LastUpdate).ToLocalTime());
+                .WithFooter("Bot by Stephen White - https://silk.one/\n" +
+                            _configuration["UserUpdates:Reactions:Subscribe"] + "- Subscribe to notifications\n" +
+                            _configuration["UserUpdates:Reactions:Unsubscribe"] + "- Unsubscribe from notifications")
+                .WithTimestamp(GetDate(provinceDailyInfo.LastUpdate));
 
             return embedBuilder.Build();
         }

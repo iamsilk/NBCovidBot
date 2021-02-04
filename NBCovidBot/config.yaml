@@ -1,6 +1,6 @@
 ﻿Token: "CHANGEME"
 
-TimeZone: "Atlantic Standard Time"
+TimeZone: "America/Halifax"
 
 Commands:
   Prefix: "c!"
