@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NBCovidBot.Commands;
+using NBCovidBot.Covid;
 using NBCovidBot.Discord.Announcements;
 using System.Linq;
 using System.Threading;
@@ -19,7 +20,8 @@ namespace NBCovidBot.Discord
         private readonly IConfiguration _configuration;
         private readonly CommandHandler _commandHandler;
         private readonly DiscordSocketClient _client;
-        private readonly AnnouncementsDbContext _dbContext;
+        private readonly AnnouncementsDbContext _announcementsDbContext;
+        private readonly CovidDataDbContext _covidDataDbContext;
 
         public DiscordBot(
             Runtime runtime,
@@ -27,14 +29,16 @@ namespace NBCovidBot.Discord
             IConfiguration configuration,
             CommandHandler commandHandler,
             DiscordSocketClient client,
-            AnnouncementsDbContext dbContext)
+            AnnouncementsDbContext announcementsDbContext,
+            CovidDataDbContext covidDataDbContext)
         {
             _runtime = runtime;
             _logger = logger;
             _configuration = configuration;
             _commandHandler = commandHandler;
             _client = client;
-            _dbContext = dbContext;
+            _announcementsDbContext = announcementsDbContext;
+            _covidDataDbContext = covidDataDbContext;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -58,13 +62,14 @@ namespace NBCovidBot.Discord
 
             _client.Log += OnLog;
             _client.ReactionAdded += OnReactionAdded;
-            
+
+            await _announcementsDbContext.Database.MigrateAsync(cancellationToken);
+            await _covidDataDbContext.Database.MigrateAsync(cancellationToken);
+
             await _commandHandler.InstallCommandsAsync();
 
             await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
-
-            await _dbContext.Database.MigrateAsync(cancellationToken);
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)

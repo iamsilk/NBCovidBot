@@ -11,6 +11,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Web;
+using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace NBCovidBot.Covid
 {
@@ -18,6 +20,8 @@ namespace NBCovidBot.Covid
     {
         private readonly ActionScheduler _actionScheduler;
         private readonly ILogger<CovidDataProvider> _logger;
+        private readonly CovidDataDbContext _dbContext;
+
         private readonly List<HealthZone> _healthZones;
 
         private List<ZoneDailyInfo> _zonesDailyInfo;
@@ -29,10 +33,13 @@ namespace NBCovidBot.Covid
 
         private const string DataQueryActionKey = nameof(CovidDataProvider) + "-Query";
 
-        public CovidDataProvider(ActionScheduler actionScheduler, ILogger<CovidDataProvider> logger)
+        public CovidDataProvider(ActionScheduler actionScheduler,
+            ILogger<CovidDataProvider> logger,
+            CovidDataDbContext dbContext)
         {
             _actionScheduler = actionScheduler;
             _logger = logger;
+            _dbContext = dbContext;
 
             // ReSharper disable StringLiteralTypo
             _healthZones = new List<HealthZone>
@@ -55,6 +62,8 @@ namespace NBCovidBot.Covid
 
             // Run data query every day at 3:10pm current timezone
             _actionScheduler.ScheduleAction(DataQueryActionKey, "10 15 * * *", () => UpdateData());
+
+            RunOnDataUpdated(() => RecordUpdateToDatabase);
 
             // Get data now
             Task.Run(() => UpdateData(true));
@@ -158,7 +167,6 @@ namespace NBCovidBot.Covid
         private async Task<T> QuerySingle<T>(string service, string query, string orderBy = null) where T : class =>
             (await QueryMultiple<T>(service, query, orderBy))?.First();
 
-
         private async Task<bool> UpdateData(bool forced = false)
         {
             var cancel = false;
@@ -176,7 +184,8 @@ namespace NBCovidBot.Covid
                 }
                 else
                 {
-                    zoneDailyInfo.HealthZone = zone;
+                    zoneDailyInfo.ZoneNumber = zone.ZoneNumber;
+                    zoneDailyInfo.ZoneTitle = zone.Title;
 
                     zones.Add(zoneDailyInfo);
                 }
@@ -230,5 +239,55 @@ namespace NBCovidBot.Covid
         }
 
         public Task<bool> ForceUpdateData() => UpdateData(true);
+
+        private async Task RecordUpdateToDatabase(bool forced)
+        {
+            void CopyProperties<T>(T source, T target)
+            {
+                foreach (var property in typeof(T).GetProperties())
+                {
+                    property.SetValue(target, property.GetValue(source));
+                }
+            }
+
+            // Province data
+
+            var province = GetProvinceDailyInfo();
+
+            await _dbContext.ProvinceData.LoadAsync();
+
+            var existingProvince = await _dbContext.ProvinceData.FindAsync(province.ZoneNumber, province.LastUpdate);
+
+            if (existingProvince != null)
+            {
+                CopyProperties(province, existingProvince);
+            }
+            else
+            {
+                await _dbContext.ProvinceData.AddAsync(province);
+            }
+
+            // Zone data
+
+            var zones = GetZonesDailyInfo();
+
+            await _dbContext.ZoneData.LoadAsync();
+
+            foreach (var zone in zones)
+            {
+                var existingZone = await _dbContext.ZoneData.FindAsync(zone.ZoneNumber, zone.LastUpdate);
+
+                if (existingZone != null)
+                {
+                    CopyProperties(zone, existingZone);
+                }
+                else
+                {
+                    await _dbContext.ZoneData.AddAsync(zone);
+                }
+            }
+
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

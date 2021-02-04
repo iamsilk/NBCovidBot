@@ -91,7 +91,7 @@ namespace NBCovidBot.Covid
             foreach (var recoveryPhaseInfo in _dataProvider.GetZonesRecoveryPhaseInfo())
             {
                 if (zonesDailyInfo.Any(x =>
-                    x.HealthZone.Title.Equals(recoveryPhaseInfo.CommunityName, StringComparison.OrdinalIgnoreCase)))
+                    x.ZoneTitle.Equals(recoveryPhaseInfo.CommunityName, StringComparison.OrdinalIgnoreCase)))
                 {
                     zonesRecoveryPhases.Add(recoveryPhaseInfo);
                 }
@@ -129,11 +129,11 @@ namespace NBCovidBot.Covid
             {
                 var zone = zonesDailyInfo[i - extraRowCount];
 
-                var recoveryPhase = zonesRecoveryPhases.FirstOrDefault(x => x.HealthZone == zone.HealthZone.ZoneNumber);
+                var recoveryPhase = zonesRecoveryPhases.FirstOrDefault(x => x.HealthZone == zone.ZoneNumber);
 
                 rows[i] = new[]
                 {
-                    zone.HealthZone.Title,
+                    zone.ZoneTitle,
                     zone.ActiveCases.ToString(),
                     zone.NewToday.ToString(),
                     recoveryPhase == null ? "Unknown" : recoveryPhase.RecoveryPhase

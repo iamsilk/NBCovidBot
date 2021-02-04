@@ -3,19 +3,20 @@
 //#define MIGRATION_GENERATION
 
 using Microsoft.EntityFrameworkCore;
-using NBCovidBot.Discord.Announcements.Models;
+using NBCovidBot.Covid.Models;
+
 #if MIGRATION_GENERATION
 using Microsoft.Extensions.Configuration;
 #endif
 
-namespace NBCovidBot.Discord.Announcements
+namespace NBCovidBot.Covid
 {
-    public class AnnouncementsDbContext : DbContext
+    public class CovidDataDbContext : DbContext
     {
         #if !MIGRATION_GENERATION
         private readonly Runtime _runtime;
 
-        public AnnouncementsDbContext(Runtime runtime)
+        public CovidDataDbContext(Runtime runtime)
         {
             _runtime = runtime;
         }
@@ -35,6 +36,14 @@ namespace NBCovidBot.Discord.Announcements
             optionsBuilder.UseMySql(configuration["Database:ConnectionStrings:Default"]);
         }
 
-        public DbSet<Announcement> Announcements { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ZoneDailyInfo>()
+                .HasKey(x => new {x.ZoneNumber, x.LastUpdate});
+        }
+
+        public DbSet<ProvinceDailyInfo> ProvinceData { get; set; }
+
+        public DbSet<ZoneDailyInfo> ZoneData { get; set; }
     }
 }

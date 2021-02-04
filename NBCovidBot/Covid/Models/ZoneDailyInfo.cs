@@ -1,11 +1,20 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace NBCovidBot.Covid.Models
 {
     public class ZoneDailyInfo
     {
+        //[Key]
         [JsonIgnore]
-        public HealthZone HealthZone { get; set; }
+        public int ZoneNumber { get; set; }
+
+        //[Key]
+        [JsonPropertyName("LastUpdate")]
+        public long LastUpdate { get; set; }
+
+        [JsonIgnore]
+        public string ZoneTitle { get; set; }
 
         [JsonPropertyName("ActiveCases")]
         public int ActiveCases { get; set; }
@@ -21,8 +30,5 @@ namespace NBCovidBot.Covid.Models
 
         [JsonPropertyName("Deaths")]
         public int Deaths { get; set; }
-
-        [JsonPropertyName("LastUpdate")]
-        public long LastUpdate { get; set; }
     }
 }
