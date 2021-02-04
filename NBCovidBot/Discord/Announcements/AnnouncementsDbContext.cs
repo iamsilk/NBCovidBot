@@ -35,6 +35,12 @@ namespace NBCovidBot.Discord.Announcements
             optionsBuilder.UseMySql(configuration["Database:ConnectionStrings:Default"]);
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Announcement>()
+                .HasKey(x => new {x.GuildId, x.ChannelId});
+        }
+
         public DbSet<Announcement> Announcements { get; set; }
     }
 }
