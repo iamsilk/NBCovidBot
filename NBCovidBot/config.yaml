@@ -2,6 +2,8 @@
 
 TimeZone: "America/Halifax"
 
+CovidQuerySchedule: "5 15 * * *"
+
 Commands:
   Prefix: "c!"
 

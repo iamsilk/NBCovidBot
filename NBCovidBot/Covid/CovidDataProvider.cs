@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using NBCovidBot.Covid.Models;
 using NBCovidBot.Scheduling;
 using System;
@@ -11,8 +13,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Web;
-using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
 
 namespace NBCovidBot.Covid
 {
@@ -21,6 +21,7 @@ namespace NBCovidBot.Covid
         private readonly ActionScheduler _actionScheduler;
         private readonly ILogger<CovidDataProvider> _logger;
         private readonly CovidDataDbContext _dbContext;
+        private readonly IConfiguration _configuration;
 
         private readonly List<HealthZone> _healthZones;
 
@@ -29,17 +30,19 @@ namespace NBCovidBot.Covid
         private List<ProvincePastInfo> _provincePastInfo;
         private List<ZoneRecoveryPhaseInfo> _zonesRecoveryPhaseInfo;
 
-        private List<Func<DataUpdateCallback>> _dataUpdateTasks;
+        private readonly List<Func<DataUpdateCallback>> _dataUpdateTasks;
 
         private const string DataQueryActionKey = nameof(CovidDataProvider) + "-Query";
 
         public CovidDataProvider(ActionScheduler actionScheduler,
             ILogger<CovidDataProvider> logger,
-            CovidDataDbContext dbContext)
+            CovidDataDbContext dbContext,
+            IConfiguration configuration)
         {
             _actionScheduler = actionScheduler;
             _logger = logger;
             _dbContext = dbContext;
+            _configuration = configuration;
 
             // ReSharper disable StringLiteralTypo
             _healthZones = new List<HealthZone>
@@ -60,8 +63,7 @@ namespace NBCovidBot.Covid
 
             _dataUpdateTasks = new List<Func<DataUpdateCallback>>();
 
-            // Run data query every day at 3:10pm current timezone
-            _actionScheduler.ScheduleAction(DataQueryActionKey, "10 15 * * *", () => UpdateData());
+            _actionScheduler.ScheduleAction(DataQueryActionKey, _configuration["CovidQuerySchedule"], () => UpdateData());
 
             RunOnDataUpdated(() => RecordUpdateToDatabase);
 
