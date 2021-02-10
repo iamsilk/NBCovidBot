@@ -201,7 +201,7 @@ namespace NBCovidBot.Covid
                 cancel = true;
             }
 
-            var past = await QueryMultiple<ProvincePastInfo>("Covid19DailyCaseStats", "Total>0", "DATE desc");
+            var past = await QueryMultiple<ProvincePastInfo>("Covid19DailyCaseStats2", "Total>0", "DATE desc");
 
             if (past == null || past.Count == 0)
             {

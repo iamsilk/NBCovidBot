@@ -19,5 +19,11 @@ namespace NBCovidBot.Covid.Models
 
         [JsonPropertyName("Active")]
         public int Active { get; set; }
+
+        [JsonPropertyName("Recovered")]
+        public int Recovered { get; set; }
+
+        [JsonPropertyName("Deaths")]
+        public int Deaths { get; set; }
     }
 }
