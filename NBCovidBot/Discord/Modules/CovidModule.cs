@@ -124,5 +124,15 @@ namespace NBCovidBot.Discord.Modules
 
             await _covidAnnouncer.AnnounceAsync(embedBuilder.Build(), false);
         }
+
+        [Command("imitate")]
+        [Summary("Replies with the given message and deletes the original.")]
+        [RequireBotAdmin]
+        public async Task ImitateAsync([Remainder] string message)
+        {
+            await ReplyAsync(message);
+
+            await Context.Message.DeleteAsync();
+        }
     }
 }
