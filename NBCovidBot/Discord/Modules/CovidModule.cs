@@ -134,5 +134,47 @@ namespace NBCovidBot.Discord.Modules
 
             await Context.Message.DeleteAsync();
         }
+
+        [Command("react")]
+        [Summary("Reacts to the message before the command's with the given reaction.")]
+        [RequireBotAdmin]
+        public async Task ReactAsync(string reaction)
+        {
+            var messages =
+                await Context.Channel
+                    .GetMessagesAsync(Context.Message, Direction.Before, 1)
+                .FlattenAsync();
+
+            await Context.Message.DeleteAsync();
+
+            var message = messages?.FirstOrDefault();
+
+            if (message == null) return;
+
+            IEmote baseEmote;
+
+            if (Emote.TryParse(reaction, out var emote))
+            {
+                baseEmote = emote;
+            }
+            else
+            {
+                try
+                {
+                    baseEmote = new Emoji(reaction);
+                }
+                catch
+                {
+                    var reply = await ReplyAsync("Bad emote/emoji");
+
+                    await Task.Delay(3000);
+
+                    await reply.DeleteAsync();
+                    return;
+                }
+            }
+
+            await message.AddReactionAsync(baseEmote);
+        }
     }
 }
