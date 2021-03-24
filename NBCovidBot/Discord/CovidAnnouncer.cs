@@ -29,7 +29,7 @@ namespace NBCovidBot.Discord
             dataProvider.RunOnDataUpdated(() => OnDataUpdatedAsync);
         }
 
-        public async Task AnnounceAsync(Embed embed, bool addReactions = true)
+        public async Task AnnounceAsync(Embed embed, bool addReactions = true, bool pingRole = true)
         {
             var announcements = await _dbContext.Announcements.ToListAsync();
 
@@ -41,7 +41,9 @@ namespace NBCovidBot.Discord
 
                 if (channel == null) continue;
 
-                var role = channel.Guild.Roles.FirstOrDefault(x => x.Name == _configuration["UserUpdates:RoleName"]);
+                var role = pingRole
+                    ? channel.Guild.Roles.FirstOrDefault(x => x.Name == _configuration["UserUpdates:RoleName"])
+                    : null;
 
                 var message = await channel.SendMessageAsync(role?.Mention, embed: embed);
 

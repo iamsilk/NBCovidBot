@@ -125,6 +125,23 @@ namespace NBCovidBot.Discord.Modules
             await _covidAnnouncer.AnnounceAsync(embedBuilder.Build(), false);
         }
 
+        [Command("announcequiet")]
+        [Summary("Sends a custom announce to all daily update channels without pinging users.")]
+        [RequireBotAdmin]
+        public async Task AnnounceQuietAsync(string title, [Remainder] string message)
+        {
+            var embedBuilder = new EmbedBuilder();
+
+            embedBuilder
+                .WithTitle(title)
+                .WithColor(Color.Green)
+                .WithDescription(message)
+                .WithFooter("Bot by Stephen White - https://silk.one/", "https://static.silk.one/avatar.png")
+                .WithTimestamp(DateTime.Now);
+
+            await _covidAnnouncer.AnnounceAsync(embedBuilder.Build(), false, false);
+        }
+
         [Command("imitate")]
         [Summary("Replies with the given message and deletes the original.")]
         [RequireBotAdmin]
