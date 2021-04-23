@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -64,7 +65,7 @@ namespace NBCovidBot.Covid
 
             _dataUpdateTasks = new List<Func<DataUpdateCallback>>();
 
-            _actionScheduler.ScheduleAction(DataQueryActionKey, _configuration["CovidQuerySchedule"], () => UpdateData());
+            _actionScheduler.ScheduleAction(DataQueryActionKey, _configuration["CovidQuerySchedule"], QueryUntilDataUpdates);
 
             RunOnDataUpdated(() => RecordUpdateToDatabase);
 
@@ -172,6 +173,40 @@ namespace NBCovidBot.Covid
         private async Task<T> QuerySingle<T>(string service, string query, string orderBy = null) where T : class =>
             (await QueryMultiple<T>(service, query, orderBy))?.First();
 
+        private CancellationTokenSource _cancellationToken = new CancellationTokenSource();
+        private Task _queryLoop;
+
+        private async Task QueryUntilDataUpdates()
+        {
+            lock (_cancellationToken)
+            {
+                _cancellationToken?.Cancel();
+                _cancellationToken = new CancellationTokenSource();
+            }
+
+            _queryLoop?.Wait();
+
+            async Task QueryLoopTask(CancellationToken cancellationToken)
+            {
+                while (!await UpdateData())
+                {
+                    var delayTask = Task.Delay(TimeSpan.FromMinutes(5), cancellationToken);
+
+                    await delayTask;
+
+                    if (delayTask.IsCanceled) break;
+
+                    _logger.LogInformation("Data was not updated. Waiting five minutes and checking again.");
+                }
+            };
+
+            lock (_cancellationToken)
+            {
+                _queryLoop = QueryLoopTask(_cancellationToken.Token);
+            }
+            await _queryLoop;
+        }
+
         private async Task<bool> UpdateData(bool forced = false)
         {
             var cancel = false;
@@ -230,6 +265,8 @@ namespace NBCovidBot.Covid
             }
 
             if (cancel) return false;
+
+            if (_provinceDailyInfo != null && _provinceDailyInfo.LastUpdate == province.LastUpdate) return false;
 
             _zonesDailyInfo = zones;
             _provinceDailyInfo = province;
