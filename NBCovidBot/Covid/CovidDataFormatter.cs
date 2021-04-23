@@ -22,11 +22,10 @@ namespace NBCovidBot.Covid
             _configuration = configuration;
         }
 
-        private DateTimeOffset GetDate(long timestamp)
+        private DateTimeOffset GetDateTime()
         {
             var timeZone = TZConvert.GetTimeZoneInfo(_configuration["TimeZone"]);
-            var date = DateTimeOffset.FromUnixTimeMilliseconds(timestamp);
-            return date.Subtract(timeZone.GetUtcOffset(date));
+            return TimeZoneInfo.ConvertTime(DateTime.Now, timeZone);
         }
 
         private static string JoinRows(int spacing, params string[][] rows)
@@ -170,7 +169,7 @@ namespace NBCovidBot.Covid
                             "Check out my code: https://github.com/IAmSilK/NBCovidBot/" +
                             _configuration["UserUpdates:Reactions:Subscribe"] + "- Subscribe to notifications\n" +
                             _configuration["UserUpdates:Reactions:Unsubscribe"] + "- Unsubscribe from notifications")
-                .WithTimestamp(GetDate(provinceDailyInfo.LastUpdate));
+                .WithTimestamp(GetDateTime());
 
             return embedBuilder.Build();
         }
