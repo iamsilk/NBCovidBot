@@ -29,6 +29,7 @@ namespace NBCovidBot.Covid
         private ProvinceDailyInfo _provinceDailyInfo;
         private List<ProvincePastInfo> _provincePastInfo;
         private List<ZoneRecoveryPhaseInfo> _zonesRecoveryPhaseInfo;
+        private ProvinceVaccineInfo _provinceVaccineInfo;
 
         private readonly List<Func<DataUpdateCallback>> _dataUpdateTasks;
 
@@ -92,6 +93,8 @@ namespace NBCovidBot.Covid
 
         public IReadOnlyCollection<ZoneRecoveryPhaseInfo> GetZonesRecoveryPhaseInfo() =>
             _zonesRecoveryPhaseInfo.AsReadOnly();
+
+        public ProvinceVaccineInfo GetProvinceVaccineInfo() => _provinceVaccineInfo;
 
         public delegate Task DataUpdateCallback(bool forced);
 
@@ -218,12 +221,21 @@ namespace NBCovidBot.Covid
                 cancel = true;
             }
 
+            var provinceVaccineInfo = await QuerySingle<ProvinceVaccineInfo>("Covid19VaccineData", "'1'='1'");
+
+            if (provinceVaccineInfo == null)
+            {
+                _logger.LogWarning("Unable to retrieve province vaccine information.");
+                cancel = true;
+            }
+
             if (cancel) return false;
 
             _zonesDailyInfo = zones;
             _provinceDailyInfo = province;
             _provincePastInfo = past;
             _zonesRecoveryPhaseInfo = zonesRecovery;
+            _provinceVaccineInfo = provinceVaccineInfo;
 
             foreach (var task in _dataUpdateTasks)
             {

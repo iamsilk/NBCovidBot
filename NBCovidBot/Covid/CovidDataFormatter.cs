@@ -80,8 +80,10 @@ namespace NBCovidBot.Covid
             var provincePastWeek = _dataProvider.GetProvincePastInfo()
                 ?.OrderByDescending(x => x.UnixTimestamp).Take(7).ToList();
 
+            var provinceVaccineInfo = _dataProvider.GetProvinceVaccineInfo();
+
             if (zonesDailyInfo == null || zonesDailyInfo.Count == 0 || provinceDailyInfo == null ||
-                provincePastWeek == null || provincePastWeek.Count == 0)
+                provincePastWeek == null || provincePastWeek.Count == 0 || provinceVaccineInfo == null)
             {
                 return null;
             }
@@ -149,6 +151,12 @@ namespace NBCovidBot.Covid
                 new[] { "Community Transmission:", provinceDailyInfo.CommTransmission.ToString() },
                 new[] { "Under Investigation:", provinceDailyInfo.UnderInvestigation.ToString() });
 
+            var vaccineContent = JoinRows(2,
+                new[] {"Total Doses Administered:", provinceVaccineInfo.TotalAdministered.ToString()},
+                new[] {"Pop. With At Least One Dose:", provinceVaccineInfo.PopulationOneDose.ToString()},
+                new[] {"Estimated Fully Vaccinated:",
+                    (provinceVaccineInfo.TotalAdministered - provinceVaccineInfo.PopulationOneDose).ToString()});
+            
             var embedBuilder = new EmbedBuilder();
 
             embedBuilder
@@ -157,6 +165,7 @@ namespace NBCovidBot.Covid
                 .WithColor(Color.Green)
                 .AddField("Brief Data per Zone:", $"```{briefZoneContent}```")
                 .AddField("Provincial Information:", $"```{verboseProvinceContent}```")
+                .AddField("Provincial Vaccine Information:", $"```{vaccineContent}```")
                 .WithFooter("Bot by Stephen White - https://silk.one/\n" +
                             _configuration["UserUpdates:Reactions:Subscribe"] + "- Subscribe to notifications\n" +
                             _configuration["UserUpdates:Reactions:Unsubscribe"] + "- Unsubscribe from notifications")
