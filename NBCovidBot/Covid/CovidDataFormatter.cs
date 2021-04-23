@@ -166,7 +166,7 @@ namespace NBCovidBot.Covid
                 .AddField("Provincial Information:", $"```{verboseProvinceContent}```")
                 .AddField("Provincial Vaccine Information:", $"```{vaccineContent}```")
                 .WithFooter("Bot by Stephen White - https://silk.one/\n" +
-                            "Check out my code: https://github.com/IAmSilK/NBCovidBot/" +
+                            "Check out my code: https://github.com/IAmSilK/NBCovidBot/\n" +
                             _configuration["UserUpdates:Reactions:Subscribe"] + "- Subscribe to notifications\n" +
                             _configuration["UserUpdates:Reactions:Unsubscribe"] + "- Unsubscribe from notifications")
                 .WithTimestamp(GetDateTime());
