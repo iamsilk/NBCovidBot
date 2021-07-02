@@ -152,9 +152,21 @@ namespace NBCovidBot.Covid
 
             var vaccineContent = JoinRows(2,
                 new[] {"Total Doses Administered:", provinceVaccineInfo.TotalAdministered.ToString()},
-                new[] {"Pop. With At Least One Dose:", provinceVaccineInfo.PopulationOneDose.ToString()},
-                new[] {"Estimated Fully Vaccinated:",
-                    (provinceVaccineInfo.TotalAdministered - provinceVaccineInfo.PopulationOneDose).ToString()});
+                new[]
+                {
+                    "Pop. With First Dose:",
+                    $"{provinceVaccineInfo.PercentOneDose:0.##}% ({provinceVaccineInfo.PopulationOneDose})"
+                },
+                new[]
+                {
+                    "Pop. With Second Dose:",
+                    $"{provinceVaccineInfo.PercentSecondDose:0.##}% ({provinceVaccineInfo.PopulationSecondDose})"
+                },
+                new[]
+                {
+                    "Estimated Fully Vaccinated:",
+                    (provinceVaccineInfo.TotalAdministered - provinceVaccineInfo.PopulationOneDose).ToString()
+                });
             
             var embedBuilder = new EmbedBuilder();
 

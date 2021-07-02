@@ -19,6 +19,12 @@ namespace NBCovidBot.Covid.Models
         [JsonPropertyName("PercentOneDose")]
         public double PercentOneDose { get; set; }
 
+        [JsonPropertyName("PopSecondDose")]
+        public int PopulationSecondDose { get; set; }
+
+        [JsonPropertyName("PercentSecondDose")]
+        public double PercentSecondDose { get; set; }
+
         [JsonPropertyName("LastUpdateText")]
         public string LastUpdateText { get; set; }
     }
