@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Globalization;
 using System.Text.Json.Serialization;
 
 namespace NBCovidBot.Covid.Models
@@ -10,7 +11,15 @@ namespace NBCovidBot.Covid.Models
         public int ZoneNumber { get; set; }
 
         //[Key]
-        [JsonPropertyName("LastUpdate")]
+        [JsonPropertyName("LastUpdateText")]
+        public string LastUpdateText
+        {
+            get => DateTimeOffset.UnixEpoch.AddSeconds(LastUpdate).ToString("M/d/yyyy");
+            set => LastUpdate = DateTimeOffset.ParseExact(value, "M/d/yyyy", new CultureInfo("en-US"))
+                .ToUnixTimeSeconds();
+        }
+
+        [JsonIgnore]
         public long LastUpdate { get; set; }
 
         [JsonIgnore]
