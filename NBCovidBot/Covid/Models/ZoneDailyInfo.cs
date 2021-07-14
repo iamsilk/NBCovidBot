@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Text.Json.Serialization;
 
@@ -11,6 +12,7 @@ namespace NBCovidBot.Covid.Models
         public int ZoneNumber { get; set; }
 
         //[Key]
+        [NotMapped]
         [JsonPropertyName("LastUpdateText")]
         public string LastUpdateText
         {
