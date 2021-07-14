@@ -31,8 +31,6 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/iamsilk/nbcovidbot:latest
-          secrets: |
-            "github_token=${{ secrets.GH_PACKAGES_TOKEN }}"
             
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
