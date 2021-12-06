@@ -24,8 +24,8 @@ namespace NBCovidBot.Covid
 
         private DateTimeOffset GetDateTime()
         {
-            var timeZone = TZConvert.GetTimeZoneInfo(_configuration["TimeZone"]);
-            return TimeZoneInfo.ConvertTime(DateTime.Now, timeZone);
+            //var timeZone = TZConvert.GetTimeZoneInfo(_configuration["TimeZone"]);
+            return DateTime.UtcNow; //TimeZoneInfo.ConvertTime(DateTime.Now, timeZone);
         }
 
         private static string JoinRows(int spacing, params string[][] rows)
