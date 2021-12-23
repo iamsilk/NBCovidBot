@@ -239,7 +239,7 @@ namespace NBCovidBot.Covid
                 cancel = true;
             }
 
-            var past = await QueryMultiple<ProvincePastInfo>("Covid19DailyCaseStats2", "Total>0", "DATE desc");
+            var past = await QueryMultiple<ProvincePastInfo>("Covid19DailyCaseStats3", "Total>0", "DATE desc");
 
             if (past == null || past.Count == 0)
             {
@@ -256,7 +256,7 @@ namespace NBCovidBot.Covid
                 cancel = true;
             }
 
-            var provinceVaccineInfo = await QuerySingle<ProvinceVaccineInfo>("Covid19VaccineData", "'1'='1'");
+            var provinceVaccineInfo = await QuerySingle<ProvinceVaccineInfo>("Covid19VaccineData2", "'1'='1'");
 
             if (provinceVaccineInfo == null)
             {
