@@ -248,7 +248,7 @@ namespace NBCovidBot.Covid
             }
 
             var zonesRecovery =
-                await QueryMultiple<ZoneRecoveryPhaseInfo>("RecoveryPhases", "'1'='1'", resultRecordCount: 4000);
+                await QueryMultiple<ZoneRecoveryPhaseInfo>("COVID19_AlertLevel", "'1'='1'", resultRecordCount: 2000);
 
             if (zonesRecovery == null || zonesRecovery.Count == 0)
             {

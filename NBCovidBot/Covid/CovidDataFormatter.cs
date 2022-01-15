@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TimeZoneConverter;
 
 namespace NBCovidBot.Covid
 {
@@ -108,7 +107,7 @@ namespace NBCovidBot.Covid
                 "Zone:",
                 "Active",
                 "New",
-                "Recovery"
+                "Alert"
             };
 
             rows[i++] = new[]
@@ -116,7 +115,7 @@ namespace NBCovidBot.Covid
                 "",
                 "Cases:",
                 "Cases:",
-                "Phase:"
+                "Level:"
             };
 
             rows[i++] = new[]
@@ -137,7 +136,7 @@ namespace NBCovidBot.Covid
                     zone.ZoneTitle,
                     zone.ActiveCases.ToString(),
                     zone.NewToday.ToString(),
-                    recoveryPhase == null ? "Unknown" : recoveryPhase.RecoveryPhase
+                    recoveryPhase == null ? "Unknown" : recoveryPhase.AlertLevel
                 };
             }
 

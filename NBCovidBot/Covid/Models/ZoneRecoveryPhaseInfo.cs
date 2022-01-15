@@ -14,10 +14,13 @@ namespace NBCovidBot.Covid.Models
         public string HealthZoneStr
         {
             get => HealthZone.ToString();
-            set => HealthZone = int.Parse(value);
+            set => HealthZone = int.Parse(value ?? "0");
         }
 
         [JsonIgnore]
         public int HealthZone { get; set; }
+        
+        [JsonPropertyName("AlertLevels")]
+        public string AlertLevel { get; set; }
     }
 }
