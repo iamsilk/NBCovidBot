@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 // ReSharper disable StringLiteralTypo
 
 namespace NBCovidBot.Covid.Models
@@ -25,5 +26,11 @@ namespace NBCovidBot.Covid.Models
 
         [JsonPropertyName("UnderInves")]
         public int UnderInvestigation { get; set; }
+        
+        [JsonPropertyName("TotalPOCT")]
+        public int TotalRapidTestPositives { get; set; }
+        
+        [JsonPropertyName("NewPOCT")]
+        public int NewRapidTestPositives { get; set; }
     }
 }
