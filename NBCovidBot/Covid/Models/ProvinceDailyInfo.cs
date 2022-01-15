@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 // ReSharper disable StringLiteralTypo
 
 namespace NBCovidBot.Covid.Models
