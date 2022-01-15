@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TimeZoneConverter;
 
 namespace NBCovidBot.Covid
 {
@@ -148,7 +147,9 @@ namespace NBCovidBot.Covid
                 new[] { "Travel Related:", provinceDailyInfo.TravelRelated.ToString() },
                 new[] { "Close Contact:", provinceDailyInfo.CloseContact.ToString() },
                 new[] { "Community Transmission:", provinceDailyInfo.CommTransmission.ToString() },
-                new[] { "Under Investigation:", provinceDailyInfo.UnderInvestigation.ToString() });
+                new[] { "Under Investigation:", provinceDailyInfo.UnderInvestigation.ToString() },
+                new[] { "Total Rapid Test Positives:", $"{provinceDailyInfo.TotalRapidTestPositives} (+{provinceDailyInfo.NewRapidTestPositives})" },
+                new[] { "Current Hospitalized:", provinceDailyInfo.Hospitalized.ToString() });
 
             var vaccineContent = JoinRows(2,
                 new[] {"Total Doses Administered:", provinceVaccineInfo.TotalAdministered.ToString()},
