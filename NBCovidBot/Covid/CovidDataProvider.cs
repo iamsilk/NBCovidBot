@@ -268,7 +268,7 @@ namespace NBCovidBot.Covid
             }
 
             var provinceHospitalTrendsInfo =
-                await QuerySingle<ProvinceHospitalTrendsInfo>("Covid19HospitalTrends", "'1'='1'");
+                await QuerySingle<ProvinceHospitalTrendsInfo>("Covid19HospitalTrends", "'1'='1'", "DATE desc");
 
             if (provinceHospitalTrendsInfo == null)
             {
