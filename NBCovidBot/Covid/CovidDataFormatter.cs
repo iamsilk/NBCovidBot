@@ -80,8 +80,11 @@ namespace NBCovidBot.Covid
 
             var provinceVaccineInfo = _dataProvider.GetProvinceVaccineInfo();
 
+            var provinceHospitalTrendsInfo = _dataProvider.GetProvinceHospitalTrendsInfo();
+
             if (zonesDailyInfo == null || zonesDailyInfo.Count == 0 || provinceDailyInfo == null ||
-                provincePastWeek == null || provincePastWeek.Count == 0 || provinceVaccineInfo == null)
+                provincePastWeek == null || provincePastWeek.Count == 0 || provinceVaccineInfo == null ||
+                provinceHospitalTrendsInfo == null)
             {
                 return null;
             }
@@ -149,7 +152,8 @@ namespace NBCovidBot.Covid
                 new[] { "Community Transmission:", provinceDailyInfo.CommTransmission.ToString() },
                 new[] { "Under Investigation:", provinceDailyInfo.UnderInvestigation.ToString() },
                 new[] { "Total Rapid Test Positives:", $"{provinceDailyInfo.TotalRapidTestPositives} (+{provinceDailyInfo.NewRapidTestPositives})" },
-                new[] { "Current Hospitalized:", provinceDailyInfo.Hospitalized.ToString() });
+                new[] { "Current Hospitalized:", provinceHospitalTrendsInfo.CurrentHospitalizations.ToString() },
+                new[] { "Current ICU:", provinceHospitalTrendsInfo.CurrentICU.ToString() });
 
             var vaccineContent = JoinRows(2,
                 new[] {"Total Doses Administered:", provinceVaccineInfo.TotalAdministered.ToString()},

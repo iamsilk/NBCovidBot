@@ -14,12 +14,6 @@ namespace NBCovidBot.Covid.Models
         [JsonPropertyName("CommTrnsmsn")]
         public int CommTransmission { get; set; }
 
-        [JsonPropertyName("Hospitalised")]
-        public int Hospitalized { get; set; }
-
-        [JsonPropertyName("ICU")]
-        public int ICU { get; set; }
-
         [JsonPropertyName("TotalTests")]
         public int TotalTests { get; set; }
 
