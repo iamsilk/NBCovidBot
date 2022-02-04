@@ -1,13 +1,23 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
-WORKDIR /src
+FROM ruby:2.6.6
 
-COPY "NBCovidBot/*.csproj" "NBCovidBot/"
-RUN dotnet restore NBCovidBot
+ENV APP_ENV production
+ENV RACK_ENV production
 
-COPY . .
-RUN dotnet publish NBCovidBot -c Release -o /app/publish
+WORKDIR /app
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0
-WORKDIR /data
-COPY --from=build /app/publish /app
-ENTRYPOINT ["dotnet", "/app/NBCovidBot.dll"]
+ADD Gemfile /app/Gemfile
+ADD Gemfile.lock /app/Gemfile.lock
+
+ENV LANG=C.UTF-8 \
+    BUNDLE_JOBS=4 \
+    BUNDLE_RETRY=3
+
+ENV BUNDLER_WITHOUT development test
+
+RUN bundle install
+
+ADD . /app
+
+EXPOSE 4567
+
+CMD ["bundle", "exec", "rackup", "--host", "0.0.0.0", "-p", "4567"]
